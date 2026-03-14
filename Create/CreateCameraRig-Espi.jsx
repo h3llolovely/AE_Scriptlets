@@ -21,52 +21,41 @@
         return exit("Please select an active comp to use this script.");
     }
 
-    var myComp = app.project.activeItem;
+    var w = comp.width  / 2;
+    var h = comp.height / 2;
 
-    if (myComp != null && (myComp instanceof CompItem)) {
+    var newCamera = comp.layers.addCamera("Camera", [w, h]);
+    newCamera.position.setValue([w, h, -1500]);
 
-        var w = myComp.width / 2;
-        var h = myComp.height / 2;
-        var newCamera = myComp.layers.addCamera("Camera", [w, h]); //make a new camera
-        newCamera.position.setValue([w, h, -1500]);
-        var myLayer = myComp.selectedLayers;
+    var PosNull = comp.layers.addNull();
+    PosNull.source.name  = "Cam_Pos";
+    PosNull.threeDLayer  = true;
+    PosNull.position.setValue([w, h]);
+    PosNull.enabled      = true;
 
-        if (myLayer) {
-            var PosNull = myComp.layers.addNull();
-            PosNull.source.name = "Cam_Pos";
-            PosNull.threeDLayer = true;
-            PosNull.position.setValue([w, h]);
-            PosNull.enabled = true;
+    var RotNull = comp.layers.addNull();
+    RotNull.source.name  = "Cam_Rot";
+    RotNull.threeDLayer  = true;
+    RotNull.position.setValue([w, h]);
+    RotNull.enabled      = true;
 
-            var RotNull = myComp.layers.addNull();
-            RotNull.source.name = "Cam_Rot";
-            RotNull.threeDLayer = true;
-            RotNull.position.setValue([w, h]);
-            RotNull.enabled = true;
+    newCamera.parent = PosNull;
+    PosNull.parent   = RotNull;
 
-            newCamera.parent = PosNull;
-            PosNull.parent = RotNull;
+    var Lock3D    = '[0,0,0]';
+    var Lock1D    = '[0]';
+    var LockScale = '[100,100,100]';
 
-            var Lock3D = '[0,0,0]'; //lock unwanted properties
-            var Lock1D = '[0]';
-            var LockScale = '[100,100,100]';
+    RotNull.anchorPoint.expression = Lock3D;
+    RotNull.position.expression    = Lock3D;
+    RotNull.scale.expression       = LockScale;
 
-            RotNull.anchorPoint.expression = Lock3D;
-            RotNull.position.expression = Lock3D;
-            RotNull.scale.expression = LockScale;
-
-            PosNull.anchorPoint.expression = Lock3D;
-            PosNull.scale.expression = LockScale;
-            PosNull.orientation.expression = Lock3D;
-            PosNull.xRotation.expression = Lock1D;
-            PosNull.yRotation.expression = Lock1D;
-            PosNull.zRotation.expression = Lock1D;
-
-        } else {
-            return exit("Please select at least one layer.");
-        }
-    }
+    PosNull.anchorPoint.expression = Lock3D;
+    PosNull.scale.expression       = LockScale;
+    PosNull.orientation.expression = Lock3D;
+    PosNull.xRotation.expression   = Lock1D;
+    PosNull.yRotation.expression   = Lock1D;
+    PosNull.zRotation.expression   = Lock1D;
 
     app.endUndoGroup();
-
 })();
