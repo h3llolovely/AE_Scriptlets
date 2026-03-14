@@ -2,7 +2,7 @@
  * ?                  CreateCameraRig-Espi.jsx
  * @author         :  Jason Schwarz (https://hellolovely.tv)
  * @email          :  hello@hellolovely.tv
- * @version        :  1.0.0
+ * @version        :  1.0.1
  * @createdFor     :  Adobe After Effects CC 2024 (Version 24.1.0 Build 78)
  * @description    :  Create an Espi camera rig.
  *========================================================================**/
@@ -10,6 +10,16 @@
 (function createEspiCameraRig() {
 
     app.beginUndoGroup("Espi Camera Rig");
+
+    function exit(msg) {
+        if (msg) alert(msg);
+        app.endUndoGroup();
+    }
+
+    var comp = app.project.activeItem;
+    if (!comp || !(comp instanceof CompItem)) {
+        return exit("Please select an active comp to use this script.");
+    }
 
     var myComp = app.project.activeItem;
 
@@ -53,10 +63,8 @@
             PosNull.zRotation.expression = Lock1D;
 
         } else {
-            alert("Please select at least one layer");
+            return exit("Please select at least one layer.");
         }
-    } else {
-        alert("Please select an active comp to use this script");
     }
 
     app.endUndoGroup();
