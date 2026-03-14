@@ -2,7 +2,7 @@
  * ?                  QueueLayerMarkerSpans.jsx
  * @author         :  Jason Schwarz (https://hellolovely.tv)
  * @email          :  hello@hellolovely.tv
- * @version        :  2.0.0
+ * @version        :  2.0.1
  * @createdFor     :  Adobe After Effects CC 2024 (Version 24.1.0 Build 78)
  * @description    :  Sends the selected layer's marker spans to the Render Queue and appends the marker comment to the filename. Useful for queueing multiple parts of a single comp, without having to rename each output.
  *========================================================================**/
@@ -11,53 +11,52 @@
 
     app.beginUndoGroup("'Queue Layer Marker Spans'");
 
-    // Selected Composition
+    function exit(msg) {
+        if (msg) alert(msg);
+        app.endUndoGroup();
+    }
+    
     var comp = app.project.activeItem;
     
-    // Check if a composition is selected
+    var comp = app.project.activeItem;
     if (!comp || !(comp instanceof CompItem)) {
-        alert("Please select a composition.");
-        return;
+        return exit("Please select a composition.");
     }
 
-    // Selected Layer
-    var spanLayer = comp.selectedLayers[0]; // Assuming you want the first selected layer
-
-    // Check if a layer is selected
+    var spanLayer = comp.selectedLayers[0];
     if (!spanLayer) {
-        alert("Please select a layer.");
-        return;
+        return exit("Please select a layer.");
     }
 
-    // Layer Markers
     var layerMarkers = spanLayer.property("Marker");
 
-    // Project file path
+    if (layerMarkers.numKeys === 0) {
+        return exit("The selected layer has no markers.");
+    }
+
     var projPath = app.project.file.path;
+    var skipped  = [];
 
-    // Check if the composition has markers
-    if (layerMarkers.numKeys > 0) {
+    for (var i = 1; i <= layerMarkers.numKeys; i++) {
+        var marker     = layerMarkers.keyValue(i);
+        var markerTime = layerMarkers.keyTime(i);
+        var markerName = layerMarkers.keyValue(i).comment;
 
-        for (var i = 1; i <= layerMarkers.numKeys; i++) {
-            // Show markers duration (in seconds)
-            // alert(layerMarkers.keyValue(i).comment + " has duration of " + layerMarkers.keyValue(i).duration);
-
-            // Verify marker has a duration before adding to render queue
-            if (layerMarkers.keyValue(i).duration > 0) {
-                var item = app.project.renderQueue.items.add(comp);
-                item.timeSpanStart = layerMarkers.keyTime(i);
-                item.timeSpanDuration = layerMarkers.keyValue(i).duration;
-
-                var output = item.outputModules[1];
-                var outputFilePath = projPath + "/_Renders/" + comp.name + "_" + layerMarkers.keyValue(i).comment;
-                output.file = new File(outputFilePath);
-            } else {
-              alert("Marker " + layerMarkers.keyValue(i).comment + " is not a span.");
-            }
+        if (marker.duration <= 0) {
+            skipped.push(markerName);
+            continue;
         }
-        
-    } else {
-      alert("The selected layer has no markers.");
+
+        var item = app.project.renderQueue.items.add(comp);
+        item.timeSpanStart    = markerTime;
+        item.timeSpanDuration = marker.duration;
+
+        var output = item.outputModules[1];
+        output.file = new File(projPath + "/_Renders/" + comp.name + "_" + markerName);
+    }
+
+    if (skipped.length) {
+        alert("Skipped non-span markers: " + skipped.join(", "));
     }
 
     app.endUndoGroup();
