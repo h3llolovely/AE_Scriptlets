@@ -2,7 +2,7 @@
  * ?                  Util_MarkerPrep.jsx
  * @author         :  Jason Schwarz (https://hellolovely.tv)
  * @email          :  hello@hellolovely.tv
- * @version        :  1.0.12
+ * @version        :  1.0.13
  * @createdFor     :  After Effects CC 2022+ (v22+)
  * @description    :  Adds/Edits a Layer/Comp marker at the Current Time Indicator (Playhead). Suitable for kBar, MoBar, AEbar.
  *
@@ -327,6 +327,92 @@
     }
 
     // ─────────────────────────────────────────────────────────────
+    // UI DRAWING HELPERS
+    // ─────────────────────────────────────────────────────────────
+
+    /**
+     * Fill a rounded rectangle using overlapping rects + corner ellipses.
+     * Works within ScriptUI's limited path API (no bezier curves).
+     * @param {ScriptUIGraphics} g
+     * @param {ScriptUIBrush}    brush
+     * @param {number} x
+     * @param {number} y
+     * @param {number} w
+     * @param {number} h
+     * @param {number} r  - corner radius
+     */
+    function fillRoundedRect(g, brush, x, y, w, h, r) {
+        if (r > h / 2) { r = Math.floor(h / 2); }
+        if (r > w / 2) { r = Math.floor(w / 2); }
+        // Vertical centre strip
+        g.rectPath(x, y + r, w, h - 2 * r);
+        g.fillPath(brush);
+        // Horizontal top strip
+        g.rectPath(x + r, y, w - 2 * r, r);
+        g.fillPath(brush);
+        // Horizontal bottom strip
+        g.rectPath(x + r, y + h - r, w - 2 * r, r);
+        g.fillPath(brush);
+        // Four corner quarter-circles
+        g.ellipsePath(x, y, 2 * r, 2 * r);
+        g.fillPath(brush);
+        g.ellipsePath(x + w - 2 * r, y, 2 * r, 2 * r);
+        g.fillPath(brush);
+        g.ellipsePath(x, y + h - 2 * r, 2 * r, 2 * r);
+        g.fillPath(brush);
+        g.ellipsePath(x + w - 2 * r, y + h - 2 * r, 2 * r, 2 * r);
+        g.fillPath(brush);
+    }
+
+    /**
+     * Create a flat, rounded-corner button with hover / press visual states.
+     * @param {Group}  parent
+     * @param {string} text
+     * @param {object} opts  - { name, width, height, primary }
+     * @returns {Button}
+     */
+    function createStyledButton(parent, text, opts) {
+        if (!opts) { opts = {}; }
+        var btn = parent.add("button", undefined, "", { name: opts.name || "" });
+        btn.preferredSize = [opts.width || 90, opts.height || 26];
+        btn._label   = text;
+        btn._hover   = false;
+        btn._press   = false;
+        btn._primary = opts.primary || false;
+
+        btn.addEventListener("mouseover", function () { btn._hover = true;  btn.notify("onDraw"); });
+        btn.addEventListener("mouseout",  function () { btn._hover = false; btn._press = false; btn.notify("onDraw"); });
+        btn.addEventListener("mousedown", function () { btn._press = true;  btn.notify("onDraw"); });
+        btn.addEventListener("mouseup",   function () { btn._press = false; btn.notify("onDraw"); });
+
+        btn.onDraw = function () {
+            var g = this.graphics;
+            var w = this.size[0];
+            var h = this.size[1];
+            var r = 4;
+            var bg;
+
+            if (this._primary) {
+                bg = this._press  ? [0.16, 0.40, 0.75, 1]
+                   : this._hover ? [0.25, 0.55, 0.92, 1]
+                   :               [0.22, 0.50, 0.86, 1];
+            } else {
+                bg = this._press  ? [0.22, 0.22, 0.22, 1]
+                   : this._hover ? [0.38, 0.38, 0.38, 1]
+                   :               [0.30, 0.30, 0.30, 1];
+            }
+
+            fillRoundedRect(g, g.newBrush(g.BrushType.SOLID_COLOR, bg), 0, 0, w, h, r);
+
+            var txtPen = g.newPen(g.PenType.SOLID_COLOR, [1, 1, 1, 1], 1);
+            var sz = g.measureString(this._label);
+            g.drawString(this._label, txtPen, (w - sz.width) / 2, (h - sz.height) / 2);
+        };
+
+        return btn;
+    }
+
+    // ─────────────────────────────────────────────────────────────
     // MARKER LOOKUP
     // ─────────────────────────────────────────────────────────────
 
@@ -399,22 +485,50 @@
         }
         var durationField = durGrp.add("edittext", undefined, defaultDurTC);
         durationField.preferredSize.width = 120;
-        durGrp.add("statictext", undefined,
-            "  (blank or 00:00:00:00 = No Duration)");
+        durGrp.add("statictext", undefined, " .  or  ;  as separatorr ");
 
         // ── 1-frame minimum tickbox ──────────────────────────────
-        var oneFrameCheck = win.add(
-            "checkbox", undefined,
-            "Single Markers to 1-frame Span"
-        );
+        var oneFrameCheck = win.add("checkbox", undefined, "Single Markers to 1-frame Span");
         oneFrameCheck.value = true; // ON by default
 
         // ── Label color ─────────────────────────────────────────
         var labelPanel = win.add("panel", undefined, "Label Color");
         labelPanel.alignChildren = ["fill", "top"];
         labelPanel.margins = [10, 15, 10, 10];
-        var labelDD = labelPanel.add("dropdownlist", undefined, LABEL_NAMES);
-        labelDD.preferredSize.width = 180;
+        var labelGrp = labelPanel.add("group");
+        labelGrp.orientation = "row";
+        labelGrp.alignChildren = ["left", "center"];
+        labelGrp.spacing = 8;
+
+        // Live color swatch — shows the selected label's colour
+        var swatch = labelGrp.add("button", undefined, "");
+        swatch.preferredSize = [24, 24];
+        swatch.onDraw = function () {
+            var g   = this.graphics;
+            var w   = this.size[0];
+            var h   = this.size[1];
+            var idx = labelDD.selection ? labelDD.selection.index : 0;
+            var hex = LABEL_DATA[idx].value;
+            // Thin border
+            var borderBrush = g.newBrush(g.BrushType.SOLID_COLOR, [0.50, 0.50, 0.50, 1]);
+            fillRoundedRect(g, borderBrush, 0, 0, w, h, 3);
+            if (hex && hex.length >= 6) {
+                var cr = parseInt(hex.substr(0, 2), 16) / 255;
+                var cg = parseInt(hex.substr(2, 2), 16) / 255;
+                var cb = parseInt(hex.substr(4, 2), 16) / 255;
+                fillRoundedRect(g, g.newBrush(g.BrushType.SOLID_COLOR, [cr, cg, cb, 1]), 1, 1, w - 2, h - 2, 2);
+            } else {
+                // "None" — neutral fill
+                fillRoundedRect(g, g.newBrush(g.BrushType.SOLID_COLOR, [0.25, 0.25, 0.25, 1]), 1, 1, w - 2, h - 2, 2);
+            }
+        };
+
+        var labelDD = labelGrp.add("dropdownlist", undefined, LABEL_NAMES);
+        labelDD.preferredSize.width = 155;
+
+        labelDD.onChange = function () {
+            swatch.notify("onDraw");
+        };
 
         // Pre-select existing label (default 0 = None)
         var defaultLabelIdx = 0;
@@ -431,9 +545,8 @@
         btnGrp.alignment   = "right";
         btnGrp.spacing     = 8;
 
-        var cancelBtn = btnGrp.add("button", undefined, "Cancel",  { name: "cancel" });
-        var applyBtn  = btnGrp.add("button", undefined, "Apply",   { name: "ok"     });
-        applyBtn.active = true;
+        var cancelBtn = createStyledButton(btnGrp, "Cancel", { name: "cancel", width: 90 });
+        var applyBtn  = createStyledButton(btnGrp, "Apply",  { name: "ok", width: 90, primary: true });
 
         // ── Result holder ────────────────────────────────────────
         var result = null;
@@ -452,8 +565,8 @@
                 if (durationSecs < 0) {
                     alert(
                         "Invalid Duration Timecode.\n" +
-                        "Please use the format HH:MM:SS:FF\n" +
-                        "Example: 00:00:02:12",
+                        "Format: HH:MM:SS:FF  ( .  or  ;  as separators)\n" +
+                        "Example: 00:00:02:12  or  00.00.02.12",
                         "MarkerPrep – Input Error"
                     );
                     durationField.active = true;
