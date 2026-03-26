@@ -2,7 +2,7 @@
  * ?                  Util_MarkerPrep.jsx
  * @author         :  Jason Schwarz (https://hellolovely.tv)
  * @email          :  hello@hellolovely.tv
- * @version        :  1.0.11
+ * @version        :  1.0.12
  * @createdFor     :  After Effects CC 2022+ (v22+)
  * @description    :  Adds/Edits a Layer/Comp marker at the Current Time Indicator (Playhead). Suitable for kBar, MoBar, AEbar.
  *
@@ -45,7 +45,7 @@
         710: 136, 732: 152, 8211: 150, 8212: 151, 8216: 145, 8217: 146,
         8218: 130, 8220: 147, 8221: 148, 8222: 132, 8224: 134, 8225: 135,
         8226: 149, 8230: 133, 8240: 137, 8249: 139, 8250: 155, 8364: 128,
-        8482: 153, 65533173: 173,
+        8482: 153, 65533: 173,
     };
 
     function decodePrefBytes(raw, startIndex) {
@@ -174,12 +174,24 @@
     }
 
     /**
-     * Convert a time in seconds to a HH:MM:SS:FF string.
-     * @param {number} seconds
-     * @param {number} fps  - frames per second (always passed from active comp)
+     * Check if a frame rate is a common SMPTE drop-frame rate.
+     * @param {number} fps
+     * @returns {boolean}
+     */
+    function isDropFrameRate(fps) {
+        var rounded = Math.round(fps * 100);
+        return (rounded === 2997 || rounded === 5994);
+    }
+
+    /**
+     * Convert a time in seconds to a HH:MM:SS:FF (or HH:MM:SS;FF) string.
+     * Uses SMPTE drop-frame notation when dropFrame is true and fps is a DF rate.
+     * @param {number}  seconds
+     * @param {number}  fps       - frames per second (always passed from active comp)
+     * @param {boolean} dropFrame - true to output drop-frame timecode
      * @returns {string}
      */
-    function secondsToTimecode(seconds, fps) {
+    function secondsToTimecode(seconds, fps, dropFrame) {
         if (isNaN(seconds) || seconds < 0) { seconds = 0; }
         if (!fps || fps <= 0) {
             var activeComp = app.project && app.project.activeItem;
@@ -189,21 +201,63 @@
             }
             fps = activeComp.frameRate;
         }
+        if (dropFrame === undefined) { dropFrame = false; }
+
+        var roundFps    = Math.round(fps);
         var totalFrames = Math.round(seconds * fps);
-        var ff = totalFrames % fps;
-        var totalSecs = Math.floor(totalFrames / fps);
-        var ss = totalSecs % 60;
-        var totalMins = Math.floor(totalSecs / 60);
-        var mm = totalMins % 60;
-        var hh = Math.floor(totalMins / 60);
+        var hh, mm, ss, ff, sep;
+
+        if (dropFrame && isDropFrameRate(fps)) {
+            // SMPTE drop-frame: 2 frames dropped/min for 29.97, 4 for 59.94
+            var D              = Math.round(fps * 0.066666);
+            var framesPer10Min = roundFps * 600 - D * 9;
+            var framesPerMin   = roundFps * 60  - D;
+
+            var tens      = Math.floor(totalFrames / framesPer10Min);
+            var remainder = totalFrames % framesPer10Min;
+
+            var extraMinutes;
+            if (remainder < roundFps * 60) {
+                extraMinutes = 0;
+            } else {
+                extraMinutes = Math.floor((remainder - roundFps * 60) / framesPerMin) + 1;
+            }
+
+            var totalMinutes = tens * 10 + extraMinutes;
+            hh = Math.floor(totalMinutes / 60);
+            mm = totalMinutes % 60;
+
+            var remFrames;
+            if (extraMinutes === 0) {
+                remFrames = remainder;
+            } else {
+                remFrames = (remainder - roundFps * 60) % framesPerMin + D;
+            }
+
+            ss  = Math.floor(remFrames / roundFps);
+            ff  = remFrames % roundFps;
+            sep = ";";
+        } else {
+            // Non-drop-frame
+            ff = totalFrames % roundFps;
+            var totalSecs = Math.floor(totalFrames / roundFps);
+            ss = totalSecs % 60;
+            var totalMins = Math.floor(totalSecs / 60);
+            mm = totalMins % 60;
+            hh = Math.floor(totalMins / 60);
+            sep = ":";
+        }
+
         return zeroPad(hh, 2) + ":" +
                zeroPad(mm, 2) + ":" +
-               zeroPad(ss, 2) + ":" +
+               zeroPad(ss, 2) + sep +
                zeroPad(ff, 2);
     }
 
     /**
      * Parse a HH:MM:SS:FF timecode string to seconds.
+     * Accepts : (NDF), ; (drop-frame), and . (shorthand for :) as separators.
+     * A semicolon before the frames field triggers SMPTE drop-frame compensation.
      * Returns -1 if the string is not valid.
      * @param {string} tc
      * @param {number} fps
@@ -218,17 +272,39 @@
             }
             fps = activeComp.frameRate;
         }
-        // Accept HH:MM:SS:FF or HH:MM:SS;FF (drop-frame separator)
-        var clean = String(tc).replace(/;/, ":");
+
+        var str = String(tc);
+        // Detect drop-frame indicator (semicolon separator)
+        var isDrop = str.indexOf(";") !== -1;
+        // Normalize all separators (; . :) to colons for parsing
+        var clean = str.replace(/[;.]/g, ":");
         var parts = clean.split(":");
         if (parts.length !== 4) { return -1; }
+
         var hh = parseInt(parts[0], 10);
         var mm = parseInt(parts[1], 10);
         var ss = parseInt(parts[2], 10);
         var ff = parseInt(parts[3], 10);
         if (isNaN(hh) || isNaN(mm) || isNaN(ss) || isNaN(ff)) { return -1; }
-        if (mm > 59 || ss > 59 || ff >= fps) { return -1; }
-        return hh * 3600 + mm * 60 + ss + ff / fps;
+
+        var roundFps = Math.round(fps);
+        if (mm > 59 || ss > 59 || ff >= roundFps) { return -1; }
+
+        if (isDrop && isDropFrameRate(fps)) {
+            // SMPTE drop-frame compensation
+            var D = Math.round(fps * 0.066666);
+            var totalMinutes = hh * 60 + mm;
+            // Dropped frame numbers are invalid (e.g., 00;00 and 00;01 at non-10th minutes)
+            if (ss === 0 && ff < D && (totalMinutes % 10) !== 0) { return -1; }
+            var totalFrames = roundFps * (hh * 3600 + mm * 60 + ss) + ff
+                            - D * totalMinutes
+                            + D * Math.floor(totalMinutes / 10);
+            return totalFrames / fps;
+        }
+
+        // Non-drop-frame: convert via total frame count for accuracy with non-integer fps
+        var totalFrames = roundFps * (hh * 3600 + mm * 60 + ss) + ff;
+        return totalFrames / fps;
     }
 
     /**
@@ -276,6 +352,7 @@
         var isLayer      = opts.isLayer      || false;
         var fps          = opts.fps          || 24;
         var existingData = opts.existingData || null;
+        var dropFrame    = opts.dropFrame    || false;
 
         // ── window ──────────────────────────────────────────────
         var title = (isEdit ? "Edit " : "Add ") +
@@ -318,7 +395,7 @@
 
         var defaultDurTC = "00:00:00:00";
         if (existingData && existingData.durationSecs > 0) {
-            defaultDurTC = secondsToTimecode(existingData.durationSecs, fps);
+            defaultDurTC = secondsToTimecode(existingData.durationSecs, fps, dropFrame);
         }
         var durationField = durGrp.add("edittext", undefined, defaultDurTC);
         durationField.preferredSize.width = 120;
@@ -337,7 +414,7 @@
         labelPanel.alignChildren = ["fill", "top"];
         labelPanel.margins = [10, 15, 10, 10];
         var labelDD = labelPanel.add("dropdownlist", undefined, LABEL_NAMES);
-        labelDD.preferredSize.width =180;
+        labelDD.preferredSize.width = 180;
 
         // Pre-select existing label (default 0 = None)
         var defaultLabelIdx = 0;
@@ -455,9 +532,9 @@
      */
     function extractMarkerData(mv) {
         return {
-            comment      : mv.comment  || "",
-            durationSecs : mv.duration || 0,
-            label        : mv.label    || 0
+            comment      : mv.comment  !== undefined ? mv.comment  : "",
+            durationSecs : mv.duration !== undefined ? mv.duration : 0,
+            label        : mv.label    !== undefined ? mv.label    : 0
         };
     }
 
@@ -523,6 +600,7 @@
             isEdit       : isEdit,
             isLayer      : useLayer,
             fps          : fps,
+            dropFrame    : comp.dropFrame || false,
             existingData : existingData
         });
 
@@ -552,19 +630,6 @@
             return;
         }
         app.endUndoGroup();
-
-        // ── Success feedback ─────────────────────────────────────
-        var successMsg = (isEdit ? "Marker Updated." : "Marker Added.") +
-            "\nTarget: " + (useLayer
-                ? "Layer \"" + targetLayer.name + "\""
-                : "Composition \"" + comp.name + "\"") +
-            "\nTime: " + secondsToTimecode(cti, fps) +
-            "\nDuration: " + secondsToTimecode(dialogResult.durationSecs, fps) +
-            (dialogResult.comment ? "\nComment: " + dialogResult.comment : "");
-
-        // Non-blocking confirmation — just a quick alert.
-        // Remove these 3 lines if you prefer silent success.
-        // alert(successMsg, "MarkerPrep – Done");
 
     }
 
