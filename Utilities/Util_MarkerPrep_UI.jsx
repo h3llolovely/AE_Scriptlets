@@ -1,24 +1,25 @@
 /**========================================================================
- * ?                  Util_MarkerPrep.jsx
+ * ?                  Util_MarkerPrep_UI.jsx
  * @author         :  Jason Schwarz (https://hellolovely.tv)
  * @email          :  hello@hellolovely.tv
- * @version        :  1.0.13
+ * @version        :  1.0.2
  * @createdFor     :  After Effects CC 2022+ (v22+)
- * @description    :  Adds/Edits a Layer/Comp marker at the Current Time Indicator (Playhead). Suitable for kBar, MoBar, AEbar.
+ * @description    :  Dockable panel for adding/editing Layer or Comp markers
+ *                    at the Current Time Indicator (playhead).
  *
  *                    Behaviour summary:
  *                      - First selected layer          → Add/Edit Layer marker at CTI.
  *                      - No selected layer             → Add/Edit Comp marker at CTI.
- *                      - Marker does not exist         → Opens blank dialog to create one.
- *                      - Marker already exists at CTI  → Opens dialog with it's values pre-filled for editing.
- *                    Dialog inputs:
+ *                      - Marker does not exist         → Creates a new marker from field values.
+ *                      - Marker already exists at CTI  → Populates fields with its values, then applies.
+ *                    Panel inputs:
  *                      - Comment   : Free-text field.
  *                      - Duration  : HH:MM:SS:FF timecode (blank / 00:00:00:00 = 0 s).
  *                      - 1-frame   : If ticked, a marker with a duration of 0 frames is promoted to 1 frame.
  *                      - Label     : Dropdown list of AE's user preference 16 label Colors.
  *========================================================================**/
 
-(function () {
+(function (thisObj) {
 
     // ─────────────────────────────────────────────────────────────
     // LABEL DATA — sourced from AE preferences + getLabels()
@@ -429,176 +430,6 @@
     }
 
     // ─────────────────────────────────────────────────────────────
-    // DIALOG BUILDER
-    // ─────────────────────────────────────────────────────────────
-
-    function showDialog(opts) {
-
-        var isEdit       = opts.isEdit       || false;
-        var isLayer      = opts.isLayer      || false;
-        var fps          = opts.fps          || 24;
-        var existingData = opts.existingData || null;
-        var dropFrame    = opts.dropFrame    || false;
-
-        // ── window ──────────────────────────────────────────────
-        var title = (isEdit ? "Edit " : "Add ") +
-                    (isLayer ? "Layer" : "Comp") + " Marker";
-        var win = new Window("dialog", title);
-        win.orientation = "column";
-        win.alignChildren = ["fill", "top"];
-        win.spacing = 10;
-        win.margins = 16;
-
-        // ── info label ──────────────────────────────────────────
-        var infoText = isEdit
-            ? "Editing Existing " + (isLayer ? "Layer" : "Comp") + " Marker at Current Time."
-            : "Adding New "       + (isLayer ? "Layer" : "Comp") + " Marker at Current Time.";
-        var infoGrp = win.add("group");
-        infoGrp.add("statictext", undefined, infoText);
-
-        // ── separator ───────────────────────────────────────────
-        win.add("panel", undefined, "");
-
-        // ── Comment ─────────────────────────────────────────────
-        var commentPanel = win.add("panel", undefined, "Comment");
-        commentPanel.alignChildren = ["fill", "top"];
-        commentPanel.margins = [10, 15, 10, 10];
-        var commentField = commentPanel.add(
-            "edittext", undefined,
-            (existingData && existingData.comment) ? existingData.comment : "",
-            { multiline: false }
-        );
-        commentField.preferredSize.width = 300;
-
-        // ── Duration ────────────────────────────────────────────
-        var durPanel = win.add("panel", undefined, "Duration  (HH:MM:SS:FF)");
-        durPanel.alignChildren = ["fill", "top"];
-        durPanel.margins = [10, 15, 10, 10];
-
-        var durGrp = durPanel.add("group");
-        durGrp.orientation = "row";
-        durGrp.alignChildren = ["left", "center"];
-
-        var defaultDurTC = "00:00:00:00";
-        if (existingData && existingData.durationSecs > 0) {
-            defaultDurTC = secondsToTimecode(existingData.durationSecs, fps, dropFrame);
-        }
-        var durationField = durGrp.add("edittext", undefined, defaultDurTC);
-        durationField.preferredSize.width = 120;
-        durGrp.add("statictext", undefined, " .  or  ;  as separatorr ");
-
-        // ── 1-frame minimum tickbox ──────────────────────────────
-        var oneFrameCheck = win.add("checkbox", undefined, "Single Markers to 1-frame Span");
-        oneFrameCheck.value = true; // ON by default
-
-        // ── Label color ─────────────────────────────────────────
-        var labelPanel = win.add("panel", undefined, "Label Color");
-        labelPanel.alignChildren = ["fill", "top"];
-        labelPanel.margins = [10, 15, 10, 10];
-        var labelGrp = labelPanel.add("group");
-        labelGrp.orientation = "row";
-        labelGrp.alignChildren = ["left", "center"];
-        labelGrp.spacing = 8;
-
-        // Live color swatch — shows the selected label's colour
-        var swatch = labelGrp.add("button", undefined, "");
-        swatch.preferredSize = [24, 24];
-        swatch.onDraw = function () {
-            var g   = this.graphics;
-            var w   = this.size[0];
-            var h   = this.size[1];
-            var idx = labelDD.selection ? labelDD.selection.index : 0;
-            var hex = LABEL_DATA[idx].value;
-            // Thin border
-            var borderBrush = g.newBrush(g.BrushType.SOLID_COLOR, [0.50, 0.50, 0.50, 1]);
-            fillRoundedRect(g, borderBrush, 0, 0, w, h, 3);
-            if (hex && hex.length >= 6) {
-                var cr = parseInt(hex.substr(0, 2), 16) / 255;
-                var cg = parseInt(hex.substr(2, 2), 16) / 255;
-                var cb = parseInt(hex.substr(4, 2), 16) / 255;
-                fillRoundedRect(g, g.newBrush(g.BrushType.SOLID_COLOR, [cr, cg, cb, 1]), 1, 1, w - 2, h - 2, 2);
-            } else {
-                // "None" — neutral fill
-                fillRoundedRect(g, g.newBrush(g.BrushType.SOLID_COLOR, [0.25, 0.25, 0.25, 1]), 1, 1, w - 2, h - 2, 2);
-            }
-        };
-
-        var labelDD = labelGrp.add("dropdownlist", undefined, LABEL_NAMES);
-        labelDD.preferredSize.width = 155;
-
-        labelDD.onChange = function () {
-            swatch.notify("onDraw");
-        };
-
-        // Pre-select existing label (default 0 = None)
-        var defaultLabelIdx = 0;
-        if (existingData && typeof existingData.label === "number") {
-            defaultLabelIdx = existingData.label;
-        }
-        labelDD.selection = defaultLabelIdx;
-
-        // ── Buttons ──────────────────────────────────────────────
-        win.add("panel", undefined, ""); // separator
-
-        var btnGrp = win.add("group");
-        btnGrp.orientation = "row";
-        btnGrp.alignment   = "right";
-        btnGrp.spacing     = 8;
-
-        var cancelBtn = createStyledButton(btnGrp, "Cancel", { name: "cancel", width: 90 });
-        var applyBtn  = createStyledButton(btnGrp, "Apply",  { name: "ok", width: 90, primary: true });
-
-        // ── Result holder ────────────────────────────────────────
-        var result = null;
-
-        // ── Apply handler ────────────────────────────────────────
-        applyBtn.onClick = function () {
-
-            // Validate duration field
-            var tcStr = durationField.text;
-            var durationSecs = 0;
-
-            if (tcStr === "" || tcStr === "00:00:00:00") {
-                durationSecs = 0;
-            } else {
-                durationSecs = timecodeToSeconds(tcStr, fps);
-                if (durationSecs < 0) {
-                    alert(
-                        "Invalid Duration Timecode.\n" +
-                        "Format: HH:MM:SS:FF  ( .  or  ;  as separators)\n" +
-                        "Example: 00:00:02:12  or  00.00.02.12",
-                        "MarkerPrep – Input Error"
-                    );
-                    durationField.active = true;
-                    return; // keep dialog open
-                }
-            }
-
-            // Apply 1-frame minimum if ticked and duration is 0
-            if (oneFrameCheck.value && durationSecs === 0) {
-                durationSecs = oneFrame(fps);
-            }
-
-            result = {
-                comment      : commentField.text,
-                durationSecs : durationSecs,
-                label        : labelDD.selection ? labelDD.selection.index : 0,
-                oneFrameMin  : oneFrameCheck.value
-            };
-
-            win.close();
-        };
-
-        cancelBtn.onClick = function () {
-            result = null;
-            win.close();
-        };
-
-        win.show();
-        return result;
-    }
-
-    // ─────────────────────────────────────────────────────────────
     // APPLY MARKER DATA
     // ─────────────────────────────────────────────────────────────
 
@@ -652,101 +483,296 @@
     }
 
     // ─────────────────────────────────────────────────────────────
-    // MAIN ENTRY POINT
+    // PANEL BUILDER
     // ─────────────────────────────────────────────────────────────
 
-    function main() {
+    function buildUI(thisObj) {
 
-        // ── Guard: active project ────────────────────────────────
-        if (!app.project) {
-            alert("No Project is Currently Open.", "MarkerPrep");
-            return;
-        }
+        var win = (thisObj instanceof Panel)
+            ? thisObj
+            : new Window("palette", "MarkerPrep", undefined, { resizeable: true });
 
-        // ── Guard: active composition ────────────────────────────
-        var comp = app.project.activeItem;
-        if (!(comp instanceof CompItem)) {
-            alert(
-                "Please Open and Activate a Composition Before Running MarkerPrep.",
-                "MarkerPrep"
-            );
-            return;
-        }
+        win.orientation   = "column";
+        win.alignChildren = ["fill", "top"];
+        win.spacing       = 4;
+        win.margins       = [8, 8, 8, 8];
 
-        var fps     = comp.frameRate;
-        var cti     = comp.time; // current time in seconds
+        // ── Comment ──────────────────────────────────────────────
+        var commentGrp = win.add("group");
+        commentGrp.orientation   = "row";
+        commentGrp.alignChildren = ["left", "center"];
+        commentGrp.spacing       = 4;
 
-        // ── Determine target: layer or comp ──────────────────────
-        var useLayer  = false;
-        var targetLayer = null;
+        var commentLabel = commentGrp.add("statictext", undefined, "Comment");
+        commentLabel.preferredSize.width = 75;
 
-        if (comp.selectedLayers.length > 0) {
-            targetLayer = comp.selectedLayers[0]; // first selected layer only
-            useLayer    = true;
-        }
+        var commentField = commentGrp.add("edittext", undefined, "", { multiline: false });
+        commentField.preferredSize.width = 180;
 
-        // ── Get the appropriate marker property ──────────────────
-        var markerProp;
-        try {
-            if (useLayer) {
-                markerProp = targetLayer.property("ADBE Marker");
-                if (!markerProp) { throw new Error("Layer has No Marker Property."); }
+        // ── Duration ─────────────────────────────────────────────
+        var durGrp = win.add("group");
+        durGrp.orientation   = "row";
+        durGrp.alignChildren = ["left", "center"];
+        durGrp.spacing       = 4;
+
+        var durLabel = durGrp.add("statictext", undefined, "Duration");
+        durLabel.preferredSize.width = 75;
+
+        var durationField = durGrp.add("edittext", undefined, "00:00:00:00");
+        durationField.preferredSize.width = 80;
+        durationField.alignment = ["left", "center"];
+
+        durGrp.add("statictext", undefined, " .  or  ;  as separatorr\n");
+
+        // ── Label color ──────────────────────────────────────────
+        var labelGrp = win.add("group");
+        labelGrp.orientation   = "row";
+        labelGrp.alignChildren = ["left", "center"];
+        labelGrp.spacing       = 4;
+
+        var labelLabel = labelGrp.add("statictext", undefined, "Label");
+        labelLabel.preferredSize.width = 75;
+
+        // Live color swatch
+        var swatch = labelGrp.add("button", undefined, "");
+        swatch.preferredSize = [20, 20];
+
+        var labelDD = labelGrp.add("dropdownlist", undefined, LABEL_NAMES);
+        labelDD.preferredSize.width = 160;
+        labelDD.selection = 0;
+
+        swatch.onDraw = function () {
+            var g   = this.graphics;
+            var w   = this.size[0];
+            var h   = this.size[1];
+            var idx = labelDD.selection ? labelDD.selection.index : 0;
+            var hex = LABEL_DATA[idx].value;
+            // Thin border
+            var borderBrush = g.newBrush(g.BrushType.SOLID_COLOR, [0.50, 0.50, 0.50, 1]);
+            fillRoundedRect(g, borderBrush, 0, 0, w, h, 3);
+            if (hex && hex.length >= 6) {
+                var cr = parseInt(hex.substr(0, 2), 16) / 255;
+                var cg = parseInt(hex.substr(2, 2), 16) / 255;
+                var cb = parseInt(hex.substr(4, 2), 16) / 255;
+                fillRoundedRect(g, g.newBrush(g.BrushType.SOLID_COLOR, [cr, cg, cb, 1]), 1, 1, w - 2, h - 2, 2);
             } else {
-                markerProp = comp.markerProperty;
-                if (!markerProp) { throw new Error("Comp has No Marker Property."); }
+                fillRoundedRect(g, g.newBrush(g.BrushType.SOLID_COLOR, [0.25, 0.25, 0.25, 1]), 1, 1, w - 2, h - 2, 2);
             }
-        } catch (e) {
+        };
+
+        // ── 1-frame minimum tickbox ──────────────────────────────
+        var oneFrameGrp = win.add("group");
+        oneFrameGrp.orientation   = "row";
+        oneFrameGrp.alignChildren = ["left", "center"];
+        oneFrameGrp.spacing       = 4;
+
+        var oneFrameLabel = oneFrameGrp.add("statictext", undefined, "1-Frame Span");
+        oneFrameLabel.preferredSize.width = 75;
+
+        var oneFrameCheck = oneFrameGrp.add("checkbox", undefined, "");
+        oneFrameCheck.value = true; // ON by default
+
+        labelDD.onChange = function () {
+            swatch.notify("onDraw");
+        };
+
+        // ── Buttons ──────────────────────────────────────────────
+        var btnGrp = win.add("group");
+        btnGrp.orientation   = "row";
+        btnGrp.alignment     = ["fill", "bottom"];
+        btnGrp.alignChildren = ["left", "center"];
+        btnGrp.spacing       = 4;
+
+        var helpBtn = createStyledButton(btnGrp, "?",   { name: "help", width: 26, height: 26 });
+        var spacer  = btnGrp.add("group");
+        spacer.alignment = ["fill", "center"];
+        var getBtn  = createStyledButton(btnGrp, "Get", { name: "get", width: 60, height: 26 });
+        var setBtn  = createStyledButton(btnGrp, "Set", { name: "ok",  width: 60, height: 26, primary: true });
+
+        // ── Helper: resolve comp, target, and marker property ────
+        function resolveMarkerContext() {
+            if (!app.project) {
+                alert("No Project is Currently Open.", "MarkerPrep");
+                return null;
+            }
+            var comp = app.project.activeItem;
+            if (!(comp instanceof CompItem)) {
+                alert(
+                    "Please Open and Activate a Composition Before Running MarkerPrep.",
+                    "MarkerPrep"
+                );
+                return null;
+            }
+
+            var useLayer    = false;
+            var targetLayer = null;
+            if (comp.selectedLayers.length > 0) {
+                targetLayer = comp.selectedLayers[0];
+                useLayer    = true;
+            }
+
+            var markerProp;
+            try {
+                if (useLayer) {
+                    markerProp = targetLayer.property("ADBE Marker");
+                    if (!markerProp) { throw new Error("Layer has No Marker Property."); }
+                } else {
+                    markerProp = comp.markerProperty;
+                    if (!markerProp) { throw new Error("Comp has No Marker Property."); }
+                }
+            } catch (e) {
+                alert(
+                    "Could not access marker property:\n" + e.message,
+                    "MarkerPrep \u2013 Error"
+                );
+                return null;
+            }
+
+            return {
+                comp       : comp,
+                fps        : comp.frameRate,
+                cti        : comp.time,
+                dropFrame  : comp.dropFrame || false,
+                useLayer   : useLayer,
+                markerProp : markerProp
+            };
+        }
+
+        // ── Help button handler ──────────────────────────────────
+        helpBtn.onClick = function () {
             alert(
-                "Could not access marker property:\n" + e.message,
-                "MarkerPrep – Error"
+                "MarkerPrep UI  \u2013  Add / Edit Markers at the playhead.\n" +
+                "\n" +
+                "Target:\n" +
+                "  \u2022 Layer Selected  \u2192  Layer marker\n" +
+                "  \u2022 No Selection    \u2192  Comp marker\n" +
+                "\n" +
+                "Get Button:\n" +
+                "  \u2022 Reads the marker at the playhead and\n" +
+                "    populates the panel fields with its values.\n" +
+                "  \u2022 Alerts if no marker exists at the playhead.\n" +
+                "\n" +
+                "Set Button:\n" +
+                "  \u2022 Writes the current field values as a marker\n" +
+                "    at the playhead. Overwrites an existing marker\n" +
+                "    or creates a new one.\n" +
+                "\n" +
+                "Duration format:  HH:MM:SS:FF\n" +
+                "  Separators:  :   .   ;  (semicolon = drop-frame)\n" +
+                "\n" +
+                "1-Frame Span:\n" +
+                "  When checked, zero-duration markers\n" +
+                "  become a 1-frame span.",
+                "MarkerPrep \u2013 Help"
             );
-            return;
-        }
+        };
 
-        // ── Check for existing marker at CTI ─────────────────────
-        var existing = findMarkerAtTime(markerProp, cti, fps);
-        var isEdit   = (existing !== null);
-        var existingData = isEdit ? extractMarkerData(existing.marker) : null;
+        // ── Get button handler ───────────────────────────────────
+        getBtn.onClick = function () {
+            var ctx = resolveMarkerContext();
+            if (!ctx) { return; }
 
-        // ── Show dialog ──────────────────────────────────────────
-        var dialogResult = showDialog({
-            isEdit       : isEdit,
-            isLayer      : useLayer,
-            fps          : fps,
-            dropFrame    : comp.dropFrame || false,
-            existingData : existingData
-        });
+            var existing = findMarkerAtTime(ctx.markerProp, ctx.cti, ctx.fps);
+            if (!existing) {
+                alert(
+                    "No " + (ctx.useLayer ? "Layer" : "Comp") +
+                    " marker found at the current playhead position.",
+                    "MarkerPrep"
+                );
+                return;
+            }
 
-        if (dialogResult === null) {
-            // User cancelled — do nothing
-            return;
-        }
+            var data = extractMarkerData(existing.marker);
+            commentField.text = data.comment;
+            if (data.durationSecs > 0) {
+                durationField.text = secondsToTimecode(data.durationSecs, ctx.fps, ctx.dropFrame);
+            } else {
+                durationField.text = "00:00:00:00";
+            }
+            if (data.label >= 0 && data.label < LABEL_DATA.length) {
+                labelDD.selection = data.label;
+            }
+        };
 
-        // ── Apply with undo group ────────────────────────────────
-        var undoLabel = (isEdit ? "Edit " : "Add ") +
-                        (useLayer ? "Layer" : "Comp") + " Marker";
+        // ── Set button handler ───────────────────────────────────
+        setBtn.onClick = function () {
+            var ctx = resolveMarkerContext();
+            if (!ctx) { return; }
 
-        app.beginUndoGroup(undoLabel);
-        try {
-            applyMarker(
-                markerProp,
-                cti,
-                dialogResult,
-                isEdit ? existing.index : null
-            );
-        } catch (e) {
+            // ── Validate duration ────────────────────────────────
+            var tcStr        = durationField.text;
+            var durationSecs = 0;
+
+            if (tcStr === "" || tcStr === "00:00:00:00") {
+                durationSecs = 0;
+            } else {
+                durationSecs = timecodeToSeconds(tcStr, ctx.fps);
+                if (durationSecs < 0) {
+                    alert(
+                        "Invalid Duration Timecode.\n" +
+                        "Format: HH:MM:SS:FF  ( .  or  ;  as separators)\n" +
+                        "Example: 00:00:02:12  or  00.00.02.12",
+                        "MarkerPrep \u2013 Input Error"
+                    );
+                    return;
+                }
+            }
+
+            // Apply 1-frame minimum if ticked and duration is 0
+            if (oneFrameCheck.value && durationSecs === 0) {
+                durationSecs = oneFrame(ctx.fps);
+            }
+
+            var markerData = {
+                comment      : commentField.text,
+                durationSecs : durationSecs,
+                label        : labelDD.selection ? labelDD.selection.index : 0,
+                oneFrameMin  : oneFrameCheck.value
+            };
+
+            // ── Check for existing marker at CTI ─────────────────
+            var existing = findMarkerAtTime(ctx.markerProp, ctx.cti, ctx.fps);
+            var isEdit   = (existing !== null);
+
+            // ── Apply with undo group ────────────────────────────
+            var undoLabel = (isEdit ? "Edit " : "Add ") +
+                            (ctx.useLayer ? "Layer" : "Comp") + " Marker";
+
+            app.beginUndoGroup(undoLabel);
+            try {
+                applyMarker(
+                    ctx.markerProp,
+                    ctx.cti,
+                    markerData,
+                    isEdit ? existing.index : null
+                );
+            } catch (e) {
+                app.endUndoGroup();
+                alert(
+                    "Failed to " + (isEdit ? "Edit" : "Add") + " Marker:\n" + e.message,
+                    "MarkerPrep \u2013 Error"
+                );
+                return;
+            }
             app.endUndoGroup();
-            alert(
-                "Failed to " + (isEdit ? "Edit" : "Add") + " Marker:\n" + e.message,
-                "MarkerPrep – Error"
-            );
-            return;
-        }
-        app.endUndoGroup();
+        };
 
+        // ── Resize handling ──────────────────────────────────────
+        win.onResizing = win.onResize = function () {
+            this.layout.resize();
+        };
+
+        // ── Show / Layout ────────────────────────────────────────
+        if (win instanceof Window) {
+            win.center();
+            win.show();
+        } else {
+            win.layout.layout(true);
+            win.layout.resize();
+        }
     }
 
     // ── Run ──────────────────────────────────────────────────────
-    main();
+    buildUI(thisObj);
 
-}());
+})(this);

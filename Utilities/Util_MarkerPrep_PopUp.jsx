@@ -1,5 +1,5 @@
 /**========================================================================
- * ?                  Util_MarkerPrep.jsx
+ * ?                  Util_MarkerPrep_PopUp.jsx
  * @author         :  Jason Schwarz (https://hellolovely.tv)
  * @email          :  hello@hellolovely.tv
  * @version        :  1.0.13
@@ -485,7 +485,7 @@
         }
         var durationField = durGrp.add("edittext", undefined, defaultDurTC);
         durationField.preferredSize.width = 120;
-        durGrp.add("statictext", undefined, " .  or  ;  as separatorr ");
+        durGrp.add("statictext", undefined, " .  or  ;  as separatorr\n");
 
         // ── 1-frame minimum tickbox ──────────────────────────────
         var oneFrameCheck = win.add("checkbox", undefined, "Single Markers to 1-frame Span");
