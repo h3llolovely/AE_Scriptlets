@@ -288,8 +288,8 @@
 
         // ── info label ──────────────────────────────────────────
         var infoText = isEdit
-            ? "Editing existing " + (isLayer ? "layer" : "comp") + " marker at CTI."
-            : "Adding new "       + (isLayer ? "layer" : "comp") + " marker at CTI.";
+            ? "Editing Existing " + (isLayer ? "Layer" : "Comp") + " Marker at Current Time."
+            : "Adding New "       + (isLayer ? "Layer" : "Comp") + " Marker at Current Time.";
         var infoGrp = win.add("group");
         infoGrp.add("statictext", undefined, infoText);
 
@@ -323,7 +323,7 @@
         var durationField = durGrp.add("edittext", undefined, defaultDurTC);
         durationField.preferredSize.width = 120;
         durGrp.add("statictext", undefined,
-            "  (blank or 00:00:00:00 = zero duration)");
+            "  (blank or 00:00:00:00 = No Duration)");
 
         // ── 1-frame minimum tickbox ──────────────────────────────
         var oneFrameCheck = win.add(
@@ -337,7 +337,7 @@
         labelPanel.alignChildren = ["fill", "top"];
         labelPanel.margins = [10, 15, 10, 10];
         var labelDD = labelPanel.add("dropdownlist", undefined, LABEL_NAMES);
-        labelDD.preferredSize.width = 90;
+        labelDD.preferredSize.width =180;
 
         // Pre-select existing label (default 0 = None)
         var defaultLabelIdx = 0;
@@ -374,7 +374,7 @@
                 durationSecs = timecodeToSeconds(tcStr, fps);
                 if (durationSecs < 0) {
                     alert(
-                        "Invalid duration timecode.\n" +
+                        "Invalid Duration Timecode.\n" +
                         "Please use the format HH:MM:SS:FF\n" +
                         "Example: 00:00:02:12",
                         "MarkerPrep – Input Error"
@@ -469,7 +469,7 @@
 
         // ── Guard: active project ────────────────────────────────
         if (!app.project) {
-            alert("No project is open.", "MarkerPrep");
+            alert("No Project is Currently Open.", "MarkerPrep");
             return;
         }
 
@@ -477,7 +477,7 @@
         var comp = app.project.activeItem;
         if (!(comp instanceof CompItem)) {
             alert(
-                "Please open and activate a composition before running MarkerPrep.",
+                "Please Open and Activate a Composition Before Running MarkerPrep.",
                 "MarkerPrep"
             );
             return;
@@ -500,10 +500,10 @@
         try {
             if (useLayer) {
                 markerProp = targetLayer.property("ADBE Marker");
-                if (!markerProp) { throw new Error("Layer has no marker property."); }
+                if (!markerProp) { throw new Error("Layer has No Marker Property."); }
             } else {
                 markerProp = comp.markerProperty;
-                if (!markerProp) { throw new Error("Comp has no marker property."); }
+                if (!markerProp) { throw new Error("Comp has No Marker Property."); }
             }
         } catch (e) {
             alert(
@@ -546,7 +546,7 @@
         } catch (e) {
             app.endUndoGroup();
             alert(
-                "Failed to " + (isEdit ? "edit" : "add") + " marker:\n" + e.message,
+                "Failed to " + (isEdit ? "Edit" : "Add") + " Marker:\n" + e.message,
                 "MarkerPrep – Error"
             );
             return;
@@ -554,7 +554,7 @@
         app.endUndoGroup();
 
         // ── Success feedback ─────────────────────────────────────
-        var successMsg = (isEdit ? "Marker updated." : "Marker added.") +
+        var successMsg = (isEdit ? "Marker Updated." : "Marker Added.") +
             "\nTarget: " + (useLayer
                 ? "Layer \"" + targetLayer.name + "\""
                 : "Composition \"" + comp.name + "\"") +
