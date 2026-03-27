@@ -2,7 +2,7 @@
  * ?                  Util_MarkerPrep_UI.jsx
  * @author         :  Jason Schwarz (https://hellolovely.tv)
  * @email          :  hello@hellolovely.tv
- * @version        :  1.0.2
+ * @version        :  1.0.3
  * @createdFor     :  After Effects CC 2022+ (v22+)
  * @description    :  Dockable panel for adding/editing Layer or Comp markers
  *                    at the Current Time Indicator (playhead).
@@ -15,7 +15,7 @@
  *                    Panel inputs:
  *                      - Comment   : Free-text field.
  *                      - Duration  : HH:MM:SS:FF timecode (blank / 00:00:00:00 = 0 s).
- *                      - 1-frame   : If ticked, a marker with a duration of 0 frames is promoted to 1 frame.
+ *                      - 1-frame   : If ticked, a marker with a duration of 0 frames is promoted to 1 frame. Existing spans will be ignored.
  *                      - Label     : Dropdown list of AE's user preference 16 label Colors.
  *========================================================================**/
 
@@ -507,7 +507,7 @@
         commentLabel.preferredSize.width = 75;
 
         var commentField = commentGrp.add("edittext", undefined, "", { multiline: false });
-        commentField.preferredSize.width = 180;
+        commentField.preferredSize.width = 120;
 
         // ── Duration ─────────────────────────────────────────────
         var durGrp = win.add("group");
@@ -519,16 +519,15 @@
         durLabel.preferredSize.width = 75;
 
         var durationField = durGrp.add("edittext", undefined, "00:00:00:00");
-        durationField.preferredSize.width = 80;
+        durationField.justify = "center";
+        durationField.preferredSize.width = 120;
         durationField.alignment = ["left", "center"];
-
-        durGrp.add("statictext", undefined, " .  or  ;  as separatorr\n");
 
         // ── Label color ──────────────────────────────────────────
         var labelGrp = win.add("group");
         labelGrp.orientation   = "row";
         labelGrp.alignChildren = ["left", "center"];
-        labelGrp.spacing       = 4;
+        labelGrp.spacing       = 5;
 
         var labelLabel = labelGrp.add("statictext", undefined, "Label");
         labelLabel.preferredSize.width = 75;
@@ -538,7 +537,7 @@
         swatch.preferredSize = [20, 20];
 
         var labelDD = labelGrp.add("dropdownlist", undefined, LABEL_NAMES);
-        labelDD.preferredSize.width = 160;
+        labelDD.preferredSize.width = 94;
         labelDD.selection = 0;
 
         swatch.onDraw = function () {
@@ -663,6 +662,7 @@
                 "1-Frame Span:\n" +
                 "  When checked, zero-duration markers\n" +
                 "  become a 1-frame span.",
+                "  Existing spans will be ignored.",
                 "MarkerPrep \u2013 Help"
             );
         };
