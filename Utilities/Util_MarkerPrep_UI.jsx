@@ -519,7 +519,6 @@
         durLabel.preferredSize.width = 75;
 
         var durationField = durGrp.add("edittext", undefined, "00:00:00:00");
-        durationField.justify = "center";
         durationField.preferredSize.width = 120;
         durationField.alignment = ["left", "center"];
 
