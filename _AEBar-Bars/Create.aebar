@@ -1,0 +1,589 @@
+{
+  "type": "motiondock-aebar-toolbar",
+  "version": 1,
+  "exportedAt": "2026-03-27T14:40:10.588Z",
+  "containsUnsafeActions": true,
+  "toolbar": {
+    "id": "tb_mmp9sez0j4x8hj",
+    "name": "Create",
+    "buttons": [
+      {
+        "id": "btn_mmpah8aofxhbyr",
+        "kind": "action",
+        "label": "",
+        "displayMode": "icon",
+        "iconSource": "lucide",
+        "iconName": "Axis3d",
+        "customIconData": "",
+        "color": "#ffB932",
+        "isWide": false,
+        "tooltip": "New Null Layer",
+        "action": {
+          "type": "runScriptlet",
+          "config": {
+            "code": "/**========================================================================\n * ?                  CreateNullLayer.jsx\n * @author         :  Jason Schwarz (https://hellolovely.tv)\n * @email          :  hello@hellolovely.tv\n * @version        :  1.0.0\n * @createdFor     :  Adobe After Effects CC 2024 (Version 24.1.0 Build 78)\n * @description    :  Create a new Null layer.\n *========================================================================**/\n\n(function createNullLayer() {\n\n    app.beginUndoGroup(\"Create Null Object\");\n\n    var comp = app.project.activeItem;\n\n    var slctd_layer = comp.selectedLayers;\n\n    var new_null = comp.layers.addNull(comp.duration);\n\n    if (slctd_layer[0] != null) {\n\n        i = 0;\n        lowest_index = slctd_layer[i].index; // Initilize the placeholder for the index of the lowest layer to the first layer in the array\n        top_layer = slctd_layer[i]; // Set the Output to the layer of the placeholder\t\t\t\t\t\t\t\t   \t\t\t\t\t\t\t\t\n\n        // Go through the array of the selected layers\n        while (i < slctd_layer.length) {\n\n            // If the placeholder is bigger than the current layer set the placeholder to the value of the current layer\n            if (lowest_index > slctd_layer[i].index) {\n                lowest_index = slctd_layer[i].index;\n                top_layer = slctd_layer[i];\n            }\n            i++;\n        }\n\n        // Move the new Layer on top of the layer with the lowest index\n        new_null.moveBefore(top_layer);\n    }\n\n    app.endUndoGroup();\n\n})();"
+          },
+          "modifiers": {
+            "shift": null,
+            "alt": null,
+            "meta": null
+          }
+        }
+      },
+      {
+        "id": "btn_mmp9uc13qqmwl6",
+        "kind": "action",
+        "label": "",
+        "displayMode": "icon",
+        "iconSource": "fontawesome",
+        "iconName": "arrow-down-short-wide",
+        "customIconData": "",
+        "color": "#ff3232",
+        "isWide": false,
+        "tooltip": "New Adjustment Layer",
+        "action": {
+          "type": "runScriptlet",
+          "config": {
+            "code": "/**========================================================================\n * ?                  CreateAdjustmentLayer.jsx\n * @author         :  Jason Schwarz (https://hellolovely.tv)\n * @email          :  hello@hellolovely.tv\n * @version        :  1.0.0\n * @createdFor     :  Adobe After Effects CC 2024 (Version 24.1.0 Build 78)\n * @description    :  Create a new, blank Adjustment layer.\n *========================================================================**/\n\n(function createNullLayer(){\n\n    app.beginUndoGroup(\"Create Adjustment Layer\");\n\n    // Selected Composition\n    var comp = app.project.activeItem;\n\n    // Selected Layers\n    var slctd_layer = comp.selectedLayers;\n\n    // Create new Solid and set Adjustment Layer Flag \n    var new_adjustment = comp.layers.addSolid([1, 1, 1], \"Adjustment Layer\", comp.width, comp.height, comp.pixelAspect, comp.duration); new_adjustment.adjustmentLayer = true;\n\n    // Position of the new Layer\n    // Check if at least one Layer is Selected\n    // if so move the new Layer on top of the selected one\n    if (slctd_layer[0] != null) {\n\n        // Search for the Layer with the lowest index\n        i = 0; // Set Counter\n        lowest_index = slctd_layer[i].index; // Initilize the placeholder for the index of the lowest layer to the first layer in the array\n        top_layer = slctd_layer[i]; // Set the Output to the layer of the placeholder\t\t\t\t\t\t\t\t   \t\t\t\t\t\t\t\t\n\n        // Go through the array of the selected layers\n        while (i < slctd_layer.length) {\n\n            // If the placeholder is bigger than the current layer set the placeholder to the value of the current layer\n            if (lowest_index > slctd_layer[i].index) {\n                lowest_index = slctd_layer[i].index;\n                top_layer = slctd_layer[i];\n            }\n            i++;\n        }\n        // Move the new Layer on top of the layer with the lowest index\n        new_adjustment.moveBefore(top_layer);\n    }\n\n    app.endUndoGroup();\n\n})();"
+          },
+          "modifiers": {
+            "shift": null,
+            "alt": null,
+            "meta": null
+          }
+        }
+      },
+      {
+        "id": "btn_mmpaqc8wrpy7xd",
+        "kind": "action",
+        "label": "",
+        "displayMode": "icon",
+        "iconSource": "fontawesome",
+        "iconName": "arrows-up-to-line",
+        "customIconData": "",
+        "color": "#ff6432",
+        "isWide": false,
+        "tooltip": "Highpass Filter",
+        "action": {
+          "type": "runScriptlet",
+          "config": {
+            "code": "/**========================================================================\n * ?                  CreateAdjustmentLayer-HighPass.jsx\n * @author         :  Jason Schwarz (https://hellolovely.tv)\n * @email          :  hello@hellolovely.tv\n * @version        :  1.0.0\n * @createdFor     :  Adobe After Effects CC 2024 (Version 24.1.0 Build 78)\n * @description    :  Create a new adjustment layer with effects (Gaussian Blur, Invert, CC Composite).\n *========================================================================**/\n\n(function createAdjustmentLayer_HighPass() {\n\n    app.beginUndoGroup(\"Create HighPass Layer\");\n\n    // Selected Composition\n    var comp = app.project.activeItem;\n\n    // Selected Layers\n    var slctd_layer = comp.selectedLayers;\n\n    var new_adjustment = comp.layers.addSolid([1, 1, 1], \"HighPass\", comp.width, comp.height, comp.pixelAspect, comp.duration);\n    new_adjustment.adjustmentLayer = true;\n    new_adjustment.Effects.addProperty(\"Gaussian Blur\");\n    new_adjustment.Effects.addProperty(\"Invert\");\n    new_adjustment.Effects.addProperty(\"CC Composite\");\n\n    // Position of the new Layer\n    // Check if at least one Layer is Selected\n    // if so move the new Layer on top of the selected one\n    if (slctd_layer[0] != null) {\n\n        // Search for the Layer with the lowest index\n        i = 0; // Set Counter\n        lowest_index = slctd_layer[i].index; // Initilize the placeholder for the index of the lowest layer to the first layer in the array\n        top_layer = slctd_layer[i]; // Set the Output to the layer of the placeholder\t\t\t\t\t\t\t\t   \t\t\t\t\t\t\t\t\n\n        // Go through the array of the selected layers\n        while (i < slctd_layer.length) {\n\n            // If the placeholder is bigger than the current layer set the placeholder to the value of the current layer\n            if (lowest_index > slctd_layer[i].index) {\n                lowest_index = slctd_layer[i].index;\n                top_layer = slctd_layer[i];\n            }\n            i++;\n        }\n\n        // Move the new Layer on top of the layer with the lowest index\n        new_adjustment.moveBefore(top_layer);\n    }\n\n    app.endUndoGroup();\n\n})();"
+          },
+          "modifiers": {
+            "shift": null,
+            "alt": null,
+            "meta": null
+          }
+        }
+      },
+      {
+        "id": "btn_mmpax8cctxryvj",
+        "kind": "action",
+        "label": "",
+        "displayMode": "icon",
+        "iconSource": "fontawesome",
+        "iconName": "arrow-up-right-dots",
+        "customIconData": "",
+        "color": "#FF6432",
+        "isWide": false,
+        "tooltip": "Sharpen Add Grain",
+        "action": {
+          "type": "runScriptlet",
+          "config": {
+            "code": "/**========================================================================\n * ?                  CreateAdjustmentLayer-SharpenAddGrain.jsx\n * @author         :  Jason Schwarz (https://hellolovely.tv)\n * @email          :  hello@hellolovely.tv\n * @version        :  1.0.0\n * @createdFor     :  Adobe After Effects CC 2024 (Version 24.1.0 Build 78)\n * @description    :  Create a new Solid layer with effects (Sharpen, Unsharp Mask, Add Grain).\n *========================================================================**/\n\n(function createAdjustmentLayer_SharpenAddGrain() {\n\n    app.beginUndoGroup(\"Create Sharpen Grain Layer\");\n\n    // Selected Composition\n    var comp = app.project.activeItem;\n    // Selected Layers\n    var slctd_layer = comp.selectedLayers;\n\n    var new_adjustment = comp.layers.addSolid([1, 1, 1], \"Sharpen + Grain\", comp.width, comp.height, comp.pixelAspect, comp.duration);\n    new_adjustment.adjustmentLayer = true;\n    new_adjustment.Effects.addProperty(\"Sharpen\");\n    new_adjustment.Effects.addProperty(\"Unsharp Mask\");\n    new_adjustment.Effects.addProperty(\"Add Grain\");\n\n    // Position of the new Layer\n    // Check if at least one Layer is Selected\n    // if so move the new Layer on top of the selected one\n    if (slctd_layer[0] != null) {\n\n        // Search for the Layer with the lowest index\n        i = 0; // Set Counter\n        lowest_index = slctd_layer[i].index; // Initilize the placeholder for the index of the lowest layer to the first layer in the array\n        top_layer = slctd_layer[i]; // Set the Output to the layer of the placeholder\t\t\t\t\t\t\t\t   \t\t\t\t\t\t\t\t\n\n        // Go through the array of the selected layers\n        while (i < slctd_layer.length) {\n\n            // If the placeholder is bigger than the current layer set the placeholder to the value of the current layer\n            if (lowest_index > slctd_layer[i].index) {\n                lowest_index = slctd_layer[i].index;\n                top_layer = slctd_layer[i];\n            }\n            i++;\n        }\n        // Move the new Layer on top of the layer with the lowest index\n        new_adjustment.moveBefore(top_layer);\n    }\n\n    app.endUndoGroup();\n\n})();"
+          },
+          "modifiers": {
+            "shift": null,
+            "alt": null,
+            "meta": null
+          }
+        }
+      },
+      {
+        "id": "btn_mmpb24nvbxcrd7",
+        "kind": "action",
+        "label": "",
+        "displayMode": "icon",
+        "iconSource": "fontawesome",
+        "iconName": "arrows-to-eye",
+        "customIconData": "",
+        "color": "#FF6432",
+        "isWide": false,
+        "tooltip": "Distortion Vignette",
+        "action": {
+          "type": "runScriptlet",
+          "config": {
+            "code": "/**========================================================================\n * ?                  CreateAdjustmentLayer-DistortionVignette.jsx\n * @author         :  Jason Schwarz (https://hellolovely.tv)\n * @email          :  hello@hellolovely.tv\n * @version        :  1.0.0\n * @createdFor     :  Adobe After Effects CC 2024 (Version 24.1.0 Build 78)\n * @description    :  Create a new adjustment layer with effects (Warp, Quick Chromatic Abberation 3, CC Vignette).\n *========================================================================**/\n\n(function createAdjustmentLayer_DistortVignette() {\n\n    app.beginUndoGroup(\"Create Distortion Vignette Layer\");\n\n    // Selected Composition\n    var comp = app.project.activeItem;\n    // Selected Layers\n    var slctd_layer = comp.selectedLayers;\n\n    var new_adjustment = comp.layers.addSolid([1, 1, 1], \"Distortion + Vignette\", comp.width, comp.height, comp.pixelAspect, comp.duration);\n    new_adjustment.adjustmentLayer = true;\n    new_adjustment.Effects.addProperty(\"Warp\");\n    new_adjustment.Effects.addProperty(\"Quick Chromatic Aberration 3\");\n    new_adjustment.Effects.addProperty(\"CC Vignette\");\n\n    // Position of the new Layer\n    // Check if at least one Layer is Selected\n    // if so move the new Layer on top of the selected one\n    if (slctd_layer[0] != null) {\n\n        // Search for the Layer with the lowest index\n        i = 0; // Set Counter\n        lowest_index = slctd_layer[i].index; // Initilize the placeholder for the index of the lowest layer to the first layer in the array\n        top_layer = slctd_layer[i]; // Set the Output to the layer of the placeholder\t\t\t\t\t\t\t\t   \t\t\t\t\t\t\t\t\n\n        // Go through the array of the selected layers\n        while (i < slctd_layer.length) {\n\n            // If the placeholder is bigger than the current layer set the placeholder to the value of the current layer\n            if (lowest_index > slctd_layer[i].index) {\n                lowest_index = slctd_layer[i].index;\n                top_layer = slctd_layer[i];\n            }\n            i++;\n        }\n        // Move the new Layer on top of the layer with the lowest index\n        new_adjustment.moveBefore(top_layer);\n    }\n\n    app.endUndoGroup();\n\n})();"
+          },
+          "modifiers": {
+            "shift": null,
+            "alt": null,
+            "meta": null
+          }
+        }
+      },
+      {
+        "id": "btn_mmpb9elhfefyns",
+        "kind": "action",
+        "label": "",
+        "displayMode": "icon",
+        "iconSource": "fontawesome",
+        "iconName": "circle-nodes",
+        "customIconData": "",
+        "color": "#FF6432",
+        "isWide": false,
+        "tooltip": "Color Correction",
+        "action": {
+          "type": "runScriptlet",
+          "config": {
+            "code": "/**========================================================================\n * ?                  CreateAdjustmentLayer-ColorCorrection.jsx\n * @author         :  Jason Schwarz (https://hellolovely.tv)\n * @email          :  hello@hellolovely.tv\n * @version        :  1.0.0\n * @createdFor     :  Adobe After Effects CC 2024 (Version 24.1.0 Build 78)\n * @description    :  Create a new adjustment layer with effects (Exposure, Levels, Curves, Hue/Saturation).\n *========================================================================**/\n\n(function createAdjustmentLayer_ColorCorrection() {\n\n    app.beginUndoGroup(\"Create ColorCorrection Layer\");\n\n    // Selected Composition\n    var comp = app.project.activeItem;\n    // Selected Layers\n    var slctd_layer = comp.selectedLayers;\n\n    var new_adjustment = comp.layers.addSolid([1, 1, 1], \"ColorCorrection\", comp.width, comp.height, comp.pixelAspect, comp.duration);\n    new_adjustment.adjustmentLayer = true;\n    new_adjustment.Effects.addProperty(\"HDR Highlight Compression\");\n    new_adjustment.Effects.addProperty(\"Exposure\");\n    new_adjustment.Effects.addProperty(\"Levels\");\n    new_adjustment.Effects.addProperty(\"Curves\");\n    new_adjustment.Effects.addProperty(\"Hue/Saturation\");\n\n    // Position of the new Layer\n    // Check if at least one Layer is Selected\n    // if so move the new Layer on top of the selected one\n    if (slctd_layer[0] != null) {\n\n        // Search for the Layer with the lowest index\n        i = 0; // Set Counter\n        lowest_index = slctd_layer[i].index; // Initilize the placeholder for the index of the lowest layer to the first layer in the array\n        top_layer = slctd_layer[i]; // Set the Output to the layer of the placeholder\t\t\t\t\t\t\t\t   \t\t\t\t\t\t\t\t\n\n        // Go through the array of the selected layers\n        while (i < slctd_layer.length) {\n\n            // If the placeholder is bigger than the current layer set the placeholder to the value of the current layer\n            if (lowest_index > slctd_layer[i].index) {\n                lowest_index = slctd_layer[i].index;\n                top_layer = slctd_layer[i];\n            }\n            i++;\n        }\n        // Move the new Layer on top of the layer with the lowest index\n        new_adjustment.moveBefore(top_layer);\n    }\n\n    app.endUndoGroup();\n\n})();"
+          },
+          "modifiers": {
+            "shift": null,
+            "alt": null,
+            "meta": null
+          }
+        }
+      },
+      {
+        "id": "btn_mmpbmey2xjgi72",
+        "kind": "action",
+        "label": "",
+        "displayMode": "icon",
+        "iconSource": "fontawesome",
+        "iconName": "film",
+        "customIconData": "",
+        "color": "#FF6432",
+        "isWide": false,
+        "tooltip": "Magic Bullet Looks",
+        "action": {
+          "type": "runScriptlet",
+          "config": {
+            "code": "/**========================================================================\n * ?                  CreateAdjustmentLayer-MBLooks.jsx\n * @author         :  Jason Schwarz (https://hellolovely.tv)\n * @email          :  hello@hellolovely.tv\n * @version        :  1.0.0\n * @createdFor     :  Adobe After Effects CC 2024 (Version 24.1.0 Build 78)\n * @description    :  Create a new adjustment layer with effects (Magic Bullet Looks).\n *========================================================================**/\n\n(function createAdjustmentLayer_MBLooks() {\n\n    app.beginUndoGroup(\"Create MB Looks Layer\");\n    \n    // Selected Composition\n    var comp = app.project.activeItem;\n    // Selected Layers\n    var slctd_layer = comp.selectedLayers;\n\n    var new_adjustment = comp.layers.addSolid([1, 1, 1], \"MB Looks\", comp.width, comp.height, comp.pixelAspect, comp.duration);\n    new_adjustment.adjustmentLayer = true;\n\n    // Try to apply the selected Effect, if an error occurs the new layer will be deleted\n    try {\n\n        var theEffect = new_adjustment.Effects.addProperty(\"Magic Bullet Looks\");\n    } catch (e) {\n        new_adjustment.remove();\n        alert(\"Magic Bullet Looks is not available!\");\n        app.endUndoGroup();\n    }\n\n    // Position of the new Layer\n    // Check if at least one Layer is Selected\n    // if so move the new Layer on top of the selected one\n    if (slctd_layer[0] != null) {\n\n        // Search for the Layer with the lowest index\n        i = 0; // Set Counter\n        lowest_index = slctd_layer[i].index; // Initilize the placeholder for the index of the lowest layer to the first layer in the array\n        top_layer = slctd_layer[i]; // Set the Output to the layer of the placeholder\t\t\t\t\t\t\t\t   \t\t\t\t\t\t\t\t\n\n        // Go through the array of the selected layers\n        while (i < slctd_layer.length) {\n\n            // If the placeholder is bigger than the current layer set the placeholder to the value of the current layer\n            if (lowest_index > slctd_layer[i].index) {\n                lowest_index = slctd_layer[i].index;\n                top_layer = slctd_layer[i];\n            }\n            i++;\n        }\n        // Move the new Layer on top of the layer with the lowest index\n        new_adjustment.moveBefore(top_layer);\n    }\n\n    app.endUndoGroup();\n\n})();"
+          },
+          "modifiers": {
+            "shift": null,
+            "alt": null,
+            "meta": null
+          }
+        }
+      },
+      {
+        "id": "btn_mmpbh01vf9esa0",
+        "kind": "action",
+        "label": "",
+        "displayMode": "icon",
+        "iconSource": "fontawesome",
+        "iconName": "people-group",
+        "customIconData": "",
+        "color": "#FF6432",
+        "isWide": false,
+        "tooltip": "Frischluft DoF",
+        "action": {
+          "type": "runScriptlet",
+          "config": {
+            "code": "/**========================================================================\n * ?                  CreateAdjustmentLayer-FLDoF.jsx\n * @author         :  Jason Schwarz (https://hellolovely.tv)\n * @email          :  hello@hellolovely.tv\n * @version        :  1.0.0\n * @createdFor     :  Adobe After Effects CC 2024 (Version 24.1.0 Build 78)\n * @description    :  Create a new adjustment layer with effects (Frischluft Depth of Field).\n *========================================================================**/\n\n(function createAdjustmentLayer_FLDoF() {\n\n    app.beginUndoGroup(\"Create FL Depth of Field Layer\");\n\n    // Selected Composition\n    var comp = app.project.activeItem;\n    // Selected Layers\n    var slctd_layer = comp.selectedLayers;\n\n    var new_adjustment = comp.layers.addSolid([1, 1, 1], \"FL DoF\", comp.width, comp.height, comp.pixelAspect, comp.duration);\n    new_adjustment.adjustmentLayer = true;\n\n    // Try to apply the selected Effect, if an error occurs the new layer will be deleted\n    try {\n        var theEffect = new_adjustment.Effects.addProperty(\"FL Depth Of Field\");\n    } catch (e) {\n        new_adjustment.remove();\n        alert(\"Frischluft Depth of Field is not available!\");\n        app.endUndoGroup();\n    }\n\n    // Position of the new Layer\n    // Check if at least one Layer is Selected\n    // if so move the new Layer on top of the selected one\n    if (slctd_layer[0] != null) {\n\n        // Search for the Layer with the lowest index\n        i = 0; // Set Counter\n        lowest_index = slctd_layer[i].index; // Initilize the placeholder for the index of the lowest layer to the first layer in the array\n        top_layer = slctd_layer[i]; // Set the Output to the layer of the placeholder\t\t\t\t\t\t\t\t   \t\t\t\t\t\t\t\t\n\n        // Go through the array of the selected layers\n        while (i < slctd_layer.length) {\n\n            // If the placeholder is bigger than the current layer set the placeholder to the value of the current layer\n            if (lowest_index > slctd_layer[i].index) {\n                lowest_index = slctd_layer[i].index;\n                top_layer = slctd_layer[i];\n            }\n            i++;\n        }\n        // Move the new Layer on top of the layer with the lowest index\n        new_adjustment.moveBefore(top_layer);\n    }\n\n    app.endUndoGroup();\n\n})();"
+          },
+          "modifiers": {
+            "shift": null,
+            "alt": null,
+            "meta": null
+          }
+        }
+      },
+      {
+        "id": "btn_mmpbjzv321xmka",
+        "kind": "action",
+        "label": "",
+        "displayMode": "icon",
+        "iconSource": "fontawesome",
+        "iconName": "people-group",
+        "customIconData": "",
+        "color": "#FF6432",
+        "isWide": false,
+        "tooltip": "Camera Lens Blur",
+        "action": {
+          "type": "runScriptlet",
+          "config": {
+            "code": "/**========================================================================\n * ?                  CreateAdjustmentLayer-CameraLensBlur.jsx\n * @author         :  Jason Schwarz (https://hellolovely.tv)\n * @email          :  hello@hellolovely.tv\n * @version        :  1.0.0\n * @createdFor     :  Adobe After Effects CC 2024 (Version 24.1.0 Build 78)\n * @description    :  Create a new Solid layer with effects (Camera Lens Blur).\n *========================================================================**/\n\n(function createAdjustmentLayer_CameraLensBlur() {\n\n    app.beginUndoGroup(\"Create Camera Lens Blur Layer\");\n\n    // Selected Composition\n    var comp = app.project.activeItem;\n    // Selected Layers\n    var slctd_layer = comp.selectedLayers;\n\n    var new_adjustment = comp.layers.addSolid([1, 1, 1], \"DoF - Camera Lens Blur\", comp.width, comp.height, comp.pixelAspect, comp.duration);\n    new_adjustment.adjustmentLayer = true;\n    new_adjustment.Effects.addProperty(\"Camera Lens Blur\");\n\n    // Position of the new Layer\n    // Check if at least one Layer is Selected\n    // if so move the new Layer on top of the selected one\n    if (slctd_layer[0] != null) {\n\n        // Search for the Layer with the lowest index\n        i = 0; // Set Counter\n        lowest_index = slctd_layer[i].index; // Initilize the placeholder for the index of the lowest layer to the first layer in the array\n        top_layer = slctd_layer[i]; // Set the Output to the layer of the placeholder\t\t\t\t\t\t\t\t   \t\t\t\t\t\t\t\t\n\n        // Go through the array of the selected layers\n        while (i < slctd_layer.length) {\n\n            // If the placeholder is bigger than the current layer set the placeholder to the value of the current layer\n            if (lowest_index > slctd_layer[i].index) {\n                lowest_index = slctd_layer[i].index;\n                top_layer = slctd_layer[i];\n            }\n            i++;\n        }\n        // Move the new Layer on top of the layer with the lowest index\n        new_adjustment.moveBefore(top_layer);\n    }\n\n    app.endUndoGroup();\n\n})();"
+          },
+          "modifiers": {
+            "shift": null,
+            "alt": null,
+            "meta": null
+          }
+        }
+      },
+      {
+        "id": "btn_mmpbpkjp8z3u26",
+        "kind": "action",
+        "label": "",
+        "displayMode": "icon",
+        "iconSource": "fontawesome",
+        "iconName": "person-skiing",
+        "customIconData": "",
+        "color": "#FF6432",
+        "isWide": false,
+        "tooltip": "RSMB Pro",
+        "action": {
+          "type": "runScriptlet",
+          "config": {
+            "code": "/**========================================================================\n * ?                  CreateAdjustmentLayer-RSMBPro.jsx\n * @author         :  Jason Schwarz (https://hellolovely.tv)\n * @email          :  hello@hellolovely.tv\n * @version        :  1.0.0\n * @createdFor     :  Adobe After Effects CC 2024 (Version 24.1.0 Build 78)\n * @description    :  Create a new adjustment layer with effects (Reel Smart Motion Blur Pro).\n *========================================================================**/\n\n(function createAdjustmentLayer_RSMBPro() {\n\n    app.beginUndoGroup(\"Create RSMB Pro Layer\");\n\n    // Selected Composition\n    var comp = app.project.activeItem;\n    // Selected Layers\n    var slctd_layer = comp.selectedLayers;\n\n    var new_adjustment = comp.layers.addSolid([1, 1, 1], \"RSMB Pro\", comp.width, comp.height, comp.pixelAspect, comp.duration);\n    new_adjustment.adjustmentLayer = true;\n\n    // Try to apply the selected Effect, if an error occurs the new layer will be deleted\n    try {\n        var theEffect = new_adjustment.Effects.addProperty(\"RSMB Pro\");\n    } catch (e) {\n        new_adjustment.remove();\n        alert(\"ReelSmart Motion Blur Pro is not available!\");\n        app.endUndoGroup();\n    }\n\n    // Position of the new Layer\n    // Check if at least one Layer is Selected\n    // if so move the new Layer on top of the selected one\n    if (slctd_layer[0] != null) {\n\n        // Search for the Layer with the lowest index\n        i = 0; // Set Counter\n        lowest_index = slctd_layer[i].index; // Initilize the placeholder for the index of the lowest layer to the first layer in the array\n        top_layer = slctd_layer[i]; // Set the Output to the layer of the placeholder\t\t\t\t\t\t\t\t   \t\t\t\t\t\t\t\t\n\n        // Go through the array of the selected layers\n        while (i < slctd_layer.length) {\n\n            // If the placeholder is bigger than the current layer set the placeholder to the value of the current layer\n            if (lowest_index > slctd_layer[i].index) {\n                lowest_index = slctd_layer[i].index;\n                top_layer = slctd_layer[i];\n            }\n            i++;\n        }\n        // Move the new Layer on top of the layer with the lowest index\n        new_adjustment.moveBefore(top_layer);\n    }\n\n    app.endUndoGroup();\n\n})();"
+          },
+          "modifiers": {
+            "shift": null,
+            "alt": null,
+            "meta": null
+          }
+        }
+      },
+      {
+        "id": "btn_mmpbs5q0n8t93g",
+        "kind": "action",
+        "label": "",
+        "displayMode": "icon",
+        "iconSource": "fontawesome",
+        "iconName": "person-skiing",
+        "customIconData": "",
+        "color": "#FF6432",
+        "isWide": false,
+        "tooltip": "RSMB Pro Vectors",
+        "action": {
+          "type": "runScriptlet",
+          "config": {
+            "code": "/**========================================================================\n * ?                  CreateAdjustmentLayer-RSMBProVectors.jsx\n * @author         :  Jason Schwarz (https://hellolovely.tv)\n * @email          :  hello@hellolovely.tv\n * @version        :  1.0.0\n * @createdFor     :  Adobe After Effects CC 2024 (Version 24.1.0 Build 78)\n * @description    :  Create a new adjustment layer with effects (Reel Smart Motion Blur Pro Vectors).\n *========================================================================**/\n\n(function createAdjustmentLayer_RSMBProVectors() {\n\n    app.beginUndoGroup(\"Create RSMB Pro Vectors Layer\");\n\n    // Selected Composition\n    var comp = app.project.activeItem;\n    // Selected Layers\n    var slctd_layer = comp.selectedLayers;\n\n    var new_adjustment = comp.layers.addSolid([1, 1, 1], \"RSMB Pro Vectors\", comp.width, comp.height, comp.pixelAspect, comp.duration);\n    new_adjustment.adjustmentLayer = true;\n\n    // Try to apply the selected Effect, if an error occurs the new layer will be deleted\n    try {\n        var theEffect = new_adjustment.Effects.addProperty(\"RSMB Pro Vectors\");\n    } catch (e) {\n        new_adjustment.remove();\n        alert(\"ReelSmart Motion Blur Pro Vectors is not available!\");\n        app.endUndoGroup();\n    }\n\n    // Position of the new Layer\n    // Check if at least one Layer is Selected\n    // if so move the new Layer on top of the selected one\n    if (slctd_layer[0] != null) {\n\n        // Search for the Layer with the lowest index\n        i = 0; // Set Counter\n        lowest_index = slctd_layer[i].index; // Initilize the placeholder for the index of the lowest layer to the first layer in the array\n        top_layer = slctd_layer[i]; // Set the Output to the layer of the placeholder\t\t\t\t\t\t\t\t   \t\t\t\t\t\t\t\t\n\n        // Go through the array of the selected layers\n        while (i < slctd_layer.length) {\n\n            // If the placeholder is bigger than the current layer set the placeholder to the value of the current layer\n            if (lowest_index > slctd_layer[i].index) {\n                lowest_index = slctd_layer[i].index;\n                top_layer = slctd_layer[i];\n            }\n            i++;\n        }\n        // Move the new Layer on top of the layer with the lowest index\n        new_adjustment.moveBefore(top_layer);\n    }\n\n    app.endUndoGroup();\n\n})();"
+          },
+          "modifiers": {
+            "shift": null,
+            "alt": null,
+            "meta": null
+          }
+        }
+      },
+      {
+        "id": "btn_mmpbvo1xe5fygf",
+        "kind": "action",
+        "label": "",
+        "displayMode": "icon",
+        "iconSource": "fontawesome",
+        "iconName": "cubes",
+        "customIconData": "",
+        "color": "#FF6432",
+        "isWide": false,
+        "tooltip": "CC Toner",
+        "action": {
+          "type": "runScriptlet",
+          "config": {
+            "code": "/**========================================================================\n * ?                  CreateAdjustmentLayer-CCToner.jsx\n * @author         :  Jason Schwarz (https://hellolovely.tv)\n * @email          :  hello@hellolovely.tv\n * @version        :  1.0.0\n * @createdFor     :  Adobe After Effects CC 2024 (Version 24.1.0 Build 78)\n * @description    :  Create a new adjustment layer with effects (CC Toner).\n *========================================================================**/\n\n(function createAdjustmentLayer_CCToner() {\n\n    app.beginUndoGroup(\"Create CC Toner Layer\");\n\n    // Selected Composition\n    var comp = app.project.activeItem;\n    // Selected Layers\n    var slctd_layer = comp.selectedLayers;\n\n    var new_adjustment = comp.layers.addSolid([1, 1, 1], \"CC Toner\", comp.width, comp.height, comp.pixelAspect, comp.duration);\n    new_adjustment.adjustmentLayer = true;\n    new_adjustment.Effects.addProperty(\"CC Toner\");\n\n    // Position of the new Layer\n    // Check if at least one Layer is Selected\n    // if so move the new Layer on top of the selected one\n    if (slctd_layer[0] != null) {\n\n        // Search for the Layer with the lowest index\n        i = 0; // Set Counter\n        lowest_index = slctd_layer[i].index; // Initilize the placeholder for the index of the lowest layer to the first layer in the array\n        top_layer = slctd_layer[i]; // Set the Output to the layer of the placeholder\t\t\t\t\t\t\t\t   \t\t\t\t\t\t\t\t\n\n        // Go through the array of the selected layers\n        while (i < slctd_layer.length) {\n\n            // If the placeholder is bigger than the current layer set the placeholder to the value of the current layer\n            if (lowest_index > slctd_layer[i].index) {\n                lowest_index = slctd_layer[i].index;\n                top_layer = slctd_layer[i];\n            }\n            i++;\n        }\n        // Move the new Layer on top of the layer with the lowest index\n        new_adjustment.moveBefore(top_layer);\n    }\n\n    app.endUndoGroup();\n\n})();"
+          },
+          "modifiers": {
+            "shift": null,
+            "alt": null,
+            "meta": null
+          }
+        }
+      },
+      {
+        "id": "btn_mmpc30o6gg9aad",
+        "kind": "action",
+        "label": "",
+        "displayMode": "icon",
+        "iconSource": "lucide",
+        "iconName": "TextCursorInput",
+        "customIconData": "",
+        "color": "#64ff32",
+        "isWide": false,
+        "tooltip": "Ramp",
+        "action": {
+          "type": "runScriptlet",
+          "config": {
+            "code": "/**========================================================================\n * ?                  CreateSolidLayer-GradientRamp.jsx\n * @author         :  Jason Schwarz (https://hellolovely.tv)\n * @email          :  hello@hellolovely.tv\n * @version        :  1.0.0\n * @createdFor     :  Adobe After Effects CC 2024 (Version 24.1.0 Build 78)\n * @description    :  Create a new Solid layer with effects (Gradient Ramp).\n *========================================================================**/\n\n(function createSolidLayer_GradientRamp() {\n\n    app.beginUndoGroup(\"Create Gradient Ramp Layer\");\n\n    // Selected Composition\n    var comp = app.project.activeItem;\n    // Selected Layers\n    var slctd_layer = comp.selectedLayers;\n\n    // Create new Solid and apply Ramp Effect\n    var new_solid = comp.layers.addSolid([0, 0, 0], \"Gradient Ramp\", comp.width, comp.height, comp.pixelAspect, comp.duration);\n    new_solid.Effects.addProperty(\"Gradient Ramp\");\n\n    // Position of the new Layer\n    // Check if at least one Layer is Selected\n    // if so move the new Layer on top of the selected one\n    if (slctd_layer[0] != null) {\n\n        // Search for the Layer with the lowest index\n        i = 0; // Set Counter\n        lowest_index = slctd_layer[i].index; // Initilize the placeholder for the index of the lowest layer to the first layer in the array\n        top_layer = slctd_layer[i]; // Set the Output to the layer of the placeholder\t\t\t\t\t\t\t\t   \t\t\t\t\t\t\t\t\n\n        // Go through the array of the selected layers\n        while (i < slctd_layer.length) {\n\n            // If the placeholder is bigger than the current layer set the placeholder to the value of the current layer\n            if (lowest_index > slctd_layer[i].index) {\n                lowest_index = slctd_layer[i].index;\n                top_layer = slctd_layer[i];\n            }\n            i++;\n        }\n        // Move the new Layer on top of the layer with the lowest index\n        new_solid.moveBefore(top_layer);\n    }\n\n    app.endUndoGroup();\n\n})();"
+          },
+          "modifiers": {
+            "shift": null,
+            "alt": null,
+            "meta": null
+          }
+        }
+      },
+      {
+        "id": "btn_mmpc922t1x2d5q",
+        "kind": "action",
+        "label": "",
+        "displayMode": "icon",
+        "iconSource": "fontawesome",
+        "iconName": "water",
+        "customIconData": "",
+        "color": "#64ff32",
+        "isWide": false,
+        "tooltip": "Fractal Noise",
+        "action": {
+          "type": "runScriptlet",
+          "config": {
+            "code": "/**========================================================================\n * ?                  CreateSolidLayer-FractalNoise.jsx\n * @author         :  Jason Schwarz (https://hellolovely.tv)\n * @email          :  hello@hellolovely.tv\n * @version        :  1.0.0\n * @createdFor     :  Adobe After Effects CC 2024 (Version 24.1.0 Build 78)\n * @description    :  Create a new Solid layer with effects (Fractal Noise).\n *========================================================================**/\n\n(function createSolidLayer_FractalNoise() {\n\n    app.beginUndoGroup(\"Create Fractal Noise Layer\");\n    \n    // Selected Composition\n    var comp = app.project.activeItem;\n    // Selected Layers\n    var slctd_layer = comp.selectedLayers;\n\n    // Create new Solid and apply Fractal Noise\n    var new_solid = comp.layers.addSolid([0, 0, 0], \"Fractal Noise\", comp.width, comp.height, comp.pixelAspect, comp.duration);\n    new_solid.Effects.addProperty(\"Fractal Noise\");\n\n    // Position of the new Layer\n    // Check if at least one Layer is Selected\n    // if so move the new Layer on top of the selected one\n    if (slctd_layer[0] != null) {\n\n        // Search for the Layer with the lowest index\n        i = 0; // Set Counter\n        lowest_index = slctd_layer[i].index; // Initilize the placeholder for the index of the lowest layer to the first layer in the array\n        top_layer = slctd_layer[i]; // Set the Output to the layer of the placeholder\t\t\t\t\t\t\t\t   \t\t\t\t\t\t\t\t\n\n        // Go through the array of the selected layers\n        while (i < slctd_layer.length) {\n\n            // If the placeholder is bigger than the current layer set the placeholder to the value of the current layer\n            if (lowest_index > slctd_layer[i].index) {\n                lowest_index = slctd_layer[i].index;\n                top_layer = slctd_layer[i];\n            }\n            i++;\n        }\n        // Move the new Layer on top of the layer with the lowest index\n        new_solid.moveBefore(top_layer);\n    }\n\n    app.endUndoGroup();\n\n})();"
+          },
+          "modifiers": {
+            "shift": null,
+            "alt": null,
+            "meta": null
+          }
+        }
+      },
+      {
+        "id": "btn_mmpccf3x5umdgs",
+        "kind": "action",
+        "label": "",
+        "displayMode": "icon",
+        "iconSource": "lucide",
+        "iconName": "Tally4",
+        "customIconData": "",
+        "color": "#64ff32",
+        "isWide": false,
+        "tooltip": "4-Color Gradient",
+        "action": {
+          "type": "runScriptlet",
+          "config": {
+            "code": "/**========================================================================\n * ?                  CreateSolidLayer-4ColorGradient.jsx\n * @author         :  Jason Schwarz (https://hellolovely.tv)\n * @email          :  hello@hellolovely.tv\n * @version        :  1.0.0\n * @createdFor     :  Adobe After Effects CC 2024 (Version 24.1.0 Build 78)\n * @description    :  Create a new Solid layer with effects (4-Color Gradient).\n *========================================================================**/\n\n(function createSolidLayer_4ColorGradient() {\n\n    app.beginUndoGroup(\"Create 4-Color Gradient Layer\");\n\n    // Selected Composition\n    var comp = app.project.activeItem;\n    // Selected Layers\n    var slctd_layer = comp.selectedLayers;\n\n    // Create new Solid and apply 4-Color Gradient\n    var new_solid = comp.layers.addSolid([0, 0, 0], \"4-Color Gradient\", comp.width, comp.height, comp.pixelAspect, comp.duration);\n    my_4colorgradient = new_solid.Effects.addProperty(\"4-Color Gradient\");\n    my_4colorgradient.property(\"Color 1\").setValue([1, 1, 0.5]);\n    my_4colorgradient.property(\"Color 2\").setValue([0.5, 1, 0.5]);\n    my_4colorgradient.property(\"Color 3\").setValue([1, 0.5, 1]);\n    my_4colorgradient.property(\"Color 4\").setValue([0.5, 0.5, 1]);\n\n    // Position of the new Layer\n    // Check if at least one Layer is Selected\n    // if so move the new Layer on top of the selected one\n    if (slctd_layer[0] != null) {\n\n        // Search for the Layer with the lowest index\n        i = 0; // Set Counter\n        lowest_index = slctd_layer[i].index; // Initilize the placeholder for the index of the lowest layer to the first layer in the array\n        top_layer = slctd_layer[i]; // Set the Output to the layer of the placeholder\t\t\t\t\t\t\t\t   \t\t\t\t\t\t\t\t\n\n        // Go through the array of the selected layers\n        while (i < slctd_layer.length) {\n\n            // If the placeholder is bigger than the current layer set the placeholder to the value of the current layer\n            if (lowest_index > slctd_layer[i].index) {\n                lowest_index = slctd_layer[i].index;\n                top_layer = slctd_layer[i];\n            }\n            i++;\n        }\n        // Move the new Layer on top of the layer with the lowest index\n        new_solid.moveBefore(top_layer);\n    }\n\n    app.endUndoGroup();\n\n})();"
+          },
+          "modifiers": {
+            "shift": null,
+            "alt": null,
+            "meta": null
+          }
+        }
+      },
+      {
+        "id": "btn_mmpcgthkthplij",
+        "kind": "action",
+        "label": "",
+        "displayMode": "icon",
+        "iconSource": "fontawesome",
+        "iconName": "camera",
+        "customIconData": "",
+        "color": "#328cff",
+        "isWide": false,
+        "tooltip": "Camera - One-Node",
+        "action": {
+          "type": "runScriptlet",
+          "config": {
+            "code": "/**========================================================================\n * ?                  CreateCamera-OneNode.jsx\n * @author         :  Jason Schwarz (https://hellolovely.tv)\n * @email          :  hello@hellolovely.tv\n * @version        :  1.0.0\n * @createdFor     :  Adobe After Effects CC 2024 (Version 24.1.0 Build 78)\n * @description    :  Create a One-Node Camera.\n *========================================================================**/\n\n(function createOneNodeCamera() {\n    \n    app.beginUndoGroup(\"Create One-Node Camera\");\n\n    // Selected Composition\n    var comp = app.project.activeItem;\n\n    var new_camera = comp.layers.addCamera(\"One-Node Camera\", [comp.width / 2, comp.height / 2]);\n\n    new_camera.autoOrient = AutoOrientType.NO_AUTO_ORIENT;\n\n    app.endUndoGroup();\n\n})();"
+          },
+          "modifiers": {
+            "shift": null,
+            "alt": null,
+            "meta": null
+          }
+        }
+      },
+      {
+        "id": "btn_mmpcj5u8bmdpwy",
+        "kind": "action",
+        "label": "",
+        "displayMode": "icon",
+        "iconSource": "fontawesome",
+        "iconName": "video",
+        "customIconData": "",
+        "color": "#328cff",
+        "isWide": false,
+        "tooltip": "Camera - Two-Node",
+        "action": {
+          "type": "runScriptlet",
+          "config": {
+            "code": "/**========================================================================\n * ?                  CreateCamera-TwoNode.jsx\n * @author         :  Jason Schwarz (https://hellolovely.tv)\n * @email          :  hello@hellolovely.tv\n * @version        :  1.0.0\n * @createdFor     :  Adobe After Effects CC 2024 (Version 24.1.0 Build 78)\n * @description    :  Create a Two-Node Camera.\n *========================================================================**/\n\n(function createTwoNodeCamera() {\n\n    app.beginUndoGroup(\"Create Two-Node Camera\");\n\n    // Selected Composition\n    var comp = app.project.activeItem;\n\n    var new_camera = comp.layers.addCamera(\"Two-Node Camera\", [comp.width / 2, comp.height / 2]);\n\n    app.endUndoGroup();\n\n})();"
+          },
+          "modifiers": {
+            "shift": null,
+            "alt": null,
+            "meta": null
+          }
+        }
+      },
+      {
+        "id": "btn_mmpcl314l72dvv",
+        "kind": "action",
+        "label": "",
+        "displayMode": "icon",
+        "iconSource": "fontawesome",
+        "iconName": "person-walking-arrow-right",
+        "customIconData": "",
+        "color": "#328CFF",
+        "isWide": false,
+        "tooltip": "Camera Rig - Simple",
+        "action": {
+          "type": "runScriptlet",
+          "config": {
+            "code": "/**========================================================================\n * ?                  CreateCameraRig-Simple.jsx\n * @author         :  Jason Schwarz (https://hellolovely.tv)\n * @email          :  hello@hellolovely.tv\n * @version        :  1.0.1\n * @createdFor     :  Adobe After Effects CC 2024 (Version 24.1.0 Build 78)\n * @description    :  Create a simple camera rig.\n *========================================================================**/\n\n(function createSimpleCameraRig() {\n\n    app.beginUndoGroup(\"Simple Camera Rig\");\n\n    function exit(msg) {\n        if (msg) alert(msg);\n        app.endUndoGroup();\n    }\n\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n        return exit(\"Please select an active comp to use this script.\");\n    }\n\n    var w = comp.width  / 2;\n    var h = comp.height / 2;\n\n    var newCamera = comp.layers.addCamera(\"Rigged Camera\", [w, h]);\n    newCamera.position.setValue([w, h]);\n\n    var bankNull = comp.layers.addNull();\n    bankNull.source.name  = \"CamBank\";\n    bankNull.threeDLayer  = true;\n    bankNull.shy          = true;\n    bankNull.enabled      = false;\n\n    var pitchNull = comp.layers.addNull();\n    pitchNull.source.name = \"CamPitch\";\n    pitchNull.threeDLayer = true;\n    pitchNull.shy         = true;\n    pitchNull.enabled     = false;\n\n    var headingNull = comp.layers.addNull();\n    headingNull.source.name = \"CamHeading\";\n    headingNull.threeDLayer = true;\n    headingNull.shy         = true;\n    headingNull.enabled     = false;\n\n    var controlNull = comp.layers.addNull();\n    controlNull.source.name = \"Camera Control\";\n    controlNull.threeDLayer = true;\n    controlNull.shy         = false;\n\n    comp.hideShyLayers  = true;\n    newCamera.parent    = bankNull;\n    bankNull.parent     = pitchNull;\n    pitchNull.parent    = headingNull;\n    headingNull.parent  = controlNull;\n\n    var fx = controlNull(\"Effects\");\n\n    var pitch = fx.addProperty(\"Angle Control\");\n    pitch.name = \"Pitch (X)\";\n\n    var heading = fx.addProperty(\"Angle Control\");\n    heading.name = \"Heading (Y)\";\n\n    var bank = fx.addProperty(\"Angle Control\");\n    bank.name = \"Bank (Z)\";\n\n    var tracking = fx.addProperty(\"ADBE Slider Control\");\n    tracking.name = \"Tracking Control\";\n    tracking.slider.setValue(0);\n\n    var xPosition = fx.addProperty(\"ADBE Slider Control\");\n    xPosition.name = \"(X) Position\";\n    xPosition.slider.setValue(w);\n\n    var yPosition = fx.addProperty(\"ADBE Slider Control\");\n    yPosition.name = \"(Y) Position\";\n    yPosition.slider.setValue(h);\n\n    var zPosition = fx.addProperty(\"ADBE Slider Control\");\n    zPosition.name = \"(Z) Position\";\n    zPosition.slider.setValue(0);\n\n    controlNull.position.expression =\n        'x = effect(\"(X) Position\")(\"Slider\");' +\n        'y = effect(\"(Y) Position\")(\"Slider\");' +\n        'z = effect(\"(Z) Position\")(\"Slider\");' +\n        '[x, y, z];';\n\n    bankNull.zRotation.expression =\n        'value - [thisComp.layer(\"Camera Control\").effect(\"Bank (Z)\")(\"Angle\")];';\n\n    pitchNull.xRotation.expression =\n        'value - [thisComp.layer(\"Camera Control\").effect(\"Pitch (X)\")(\"Angle\")];';\n\n    pitchNull.yRotation.expression =\n        'value - [thisComp.layer(\"Camera Control\").effect(\"Heading (Y)\")(\"Angle\")];';\n\n    newCamera.position.expression =\n        'value - [0,0,cameraOption.zoom] + ' +\n        '[0,0,thisComp.layer(\"Camera Control\").effect(\"Tracking Control\")(\"Slider\")];';\n\n    app.endUndoGroup();\n\n})();"
+          },
+          "modifiers": {
+            "shift": null,
+            "alt": null,
+            "meta": null
+          }
+        }
+      },
+      {
+        "id": "btn_mmpcoze2qxq0wz",
+        "kind": "action",
+        "label": "",
+        "displayMode": "icon",
+        "iconSource": "fontawesome",
+        "iconName": "person-walking-dashed-line-arrow-right",
+        "customIconData": "",
+        "color": "#328CFF",
+        "isWide": false,
+        "tooltip": "Camera Rig - Espi",
+        "action": {
+          "type": "runScriptlet",
+          "config": {
+            "code": "/**========================================================================\n * ?                  CreateCameraRig-Espi.jsx\n * @author         :  Jason Schwarz (https://hellolovely.tv)\n * @email          :  hello@hellolovely.tv\n * @version        :  1.0.1\n * @createdFor     :  Adobe After Effects CC 2024 (Version 24.1.0 Build 78)\n * @description    :  Create an Espi camera rig.\n *========================================================================**/\n\n(function createEspiCameraRig() {\n\n    app.beginUndoGroup(\"Espi Camera Rig\");\n\n    function exit(msg) {\n        if (msg) alert(msg);\n        app.endUndoGroup();\n    }\n\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n        return exit(\"Please select an active comp to use this script.\");\n    }\n\n    var w = comp.width  / 2;\n    var h = comp.height / 2;\n\n    var newCamera = comp.layers.addCamera(\"Camera\", [w, h]);\n    newCamera.position.setValue([w, h, -1500]);\n\n    var PosNull = comp.layers.addNull();\n    PosNull.source.name  = \"Cam_Pos\";\n    PosNull.threeDLayer  = true;\n    PosNull.position.setValue([w, h]);\n    PosNull.enabled      = true;\n\n    var RotNull = comp.layers.addNull();\n    RotNull.source.name  = \"Cam_Rot\";\n    RotNull.threeDLayer  = true;\n    RotNull.position.setValue([w, h]);\n    RotNull.enabled      = true;\n\n    newCamera.parent = PosNull;\n    PosNull.parent   = RotNull;\n\n    var Lock3D    = '[0,0,0]';\n    var Lock1D    = '[0]';\n    var LockScale = '[100,100,100]';\n\n    RotNull.anchorPoint.expression = Lock3D;\n    RotNull.position.expression    = Lock3D;\n    RotNull.scale.expression       = LockScale;\n\n    PosNull.anchorPoint.expression = Lock3D;\n    PosNull.scale.expression       = LockScale;\n    PosNull.orientation.expression = Lock3D;\n    PosNull.xRotation.expression   = Lock1D;\n    PosNull.yRotation.expression   = Lock1D;\n    PosNull.zRotation.expression   = Lock1D;\n\n    app.endUndoGroup();\n})();"
+          },
+          "modifiers": {
+            "shift": null,
+            "alt": null,
+            "meta": null
+          }
+        }
+      },
+      {
+        "id": "btn_mmpcquzog7pgxa",
+        "kind": "action",
+        "label": "",
+        "displayMode": "icon",
+        "iconSource": "fontawesome",
+        "iconName": "lightbulb",
+        "customIconData": "",
+        "color": "#328CFF",
+        "isWide": false,
+        "tooltip": "Light",
+        "action": {
+          "type": "runScriptlet",
+          "config": {
+            "code": "/**========================================================================\n * ?                  CreateLight.jsx\n * @author         :  Jason Schwarz (https://hellolovely.tv)\n * @email          :  hello@hellolovely.tv\n * @version        :  1.0.0\n * @createdFor     :  Adobe After Effects CC 2024 (Version 24.1.0 Build 78)\n * @description    :  Create a Light.\n *========================================================================**/\n\n(function createLight() {\n\n    app.beginUndoGroup(\"Create Light\");\n\n    // Selected Composition\n    var comp = app.project.activeItem;\n    \n    // Selected Layers\n    var slctd_layer = comp.selectedLayers;\n\n    var new_light = comp.layers.addLight(\"Light 1\", [comp.width / 2, comp.height / 2]);\n\n    // Position of the new Layer\n    // Check if at least one Layer is Selected\n    // if so move the new Layer on top of the selected one\n    if (slctd_layer[0] != null) {\n\n        // Search for the Layer with the lowest index\n        i = 0; // Set Counter\n        lowest_index = slctd_layer[i].index; // Initilize the placeholder for the index of the lowest layer to the first layer in the array\n        top_layer = slctd_layer[i]; // Set the Output to the layer of the placeholder\t\t\t\t\t\t\t\t   \t\t\t\t\t\t\t\t\n\n        // Go through the array of the selected layers\n        while (i < slctd_layer.length) {\n\n            // If the placeholder is bigger than the current layer set the placeholder to the value of the current layer\n            if (lowest_index > slctd_layer[i].index) {\n                lowest_index = slctd_layer[i].index;\n                top_layer = slctd_layer[i];\n            }\n            i++;\n        }\n        // Move the new Layer on top of the layer with the lowest index\n        new_light.moveBefore(top_layer);\n    }\n\n    app.endUndoGroup();\n\n})();"
+          },
+          "modifiers": {
+            "shift": null,
+            "alt": null,
+            "meta": null
+          }
+        }
+      },
+      {
+        "id": "btn_mmpct6hnxypfyf",
+        "kind": "action",
+        "label": "",
+        "displayMode": "icon",
+        "iconSource": "fontawesome",
+        "iconName": "display",
+        "customIconData": "",
+        "color": "#ff32fA",
+        "isWide": false,
+        "tooltip": "Queue - Comp Marker Spans",
+        "action": {
+          "type": "runScriptlet",
+          "config": {
+            "code": "/**========================================================================\n * ?                  QueueCompMarkerSpans.jsx\n * @author         :  Jason Schwarz (https://hellolovely.tv)\n * @email          :  hello@hellolovely.tv\n * @version        :  2.0.1\n * @createdFor     :  Adobe After Effects CC 2024 (Version 24.1.0 Build 78)\n * @description    :  Sends composition marker spans to the Render Queue and appends the marker comment to the filename. Useful for queueing multiple parts of a single comp, without having to rename each output.\n *========================================================================**/\n\n(function queueCompMarkerSpans() {\n\n    app.beginUndoGroup(\"Queue Comp Marker Spans\");\n\n    function exit(msg) {\n        if (msg) alert(msg);\n        app.endUndoGroup();\n    }\n\n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n        return exit(\"Please select a composition.\");\n    }\n\n    if (!app.project.file) {\n        return exit(\"Please save the project before queuing renders.\");\n    }\n\n    var compMarkers = comp.markerProperty;\n    if (compMarkers.numKeys === 0) {\n        return exit(\"The selected composition has no markers.\");\n    }\n\n    var projPath = app.project.file.path;\n    var skipped  = [];\n\n    for (var i = 1; i <= compMarkers.numKeys; i++) {\n        var marker     = compMarkers.keyValue(i);\n        var markerTime = compMarkers.keyTime(i);\n        var markerName = compMarkers.keyValue(i).comment;\n\n        if (marker.duration <= 0) {\n            skipped.push(markerName);\n            continue;\n        }\n\n        var item = app.project.renderQueue.items.add(comp);\n        item.timeSpanStart    = markerTime;\n        item.timeSpanDuration = marker.duration;\n\n        var output = item.outputModules[1];\n        output.file = new File(projPath + \"/_Renders/\" + comp.name + \"_\" + markerName);\n    }\n\n    if (skipped.length) {\n        alert(\"Skipped non-span markers: \" + skipped.join(\", \"));\n    }\n\n    app.endUndoGroup();\n\n})();"
+          },
+          "modifiers": {
+            "shift": null,
+            "alt": null,
+            "meta": null
+          }
+        }
+      },
+      {
+        "id": "btn_mmpd24oyfqc83q",
+        "kind": "action",
+        "label": "",
+        "displayMode": "icon",
+        "iconSource": "fontawesome",
+        "iconName": "display",
+        "customIconData": "",
+        "color": "#FF32FA",
+        "isWide": false,
+        "tooltip": "Queue - Layer Marker Spans",
+        "action": {
+          "type": "runScriptlet",
+          "config": {
+            "code": "/**========================================================================\n * ?                  QueueLayerMarkerSpans.jsx\n * @author         :  Jason Schwarz (https://hellolovely.tv)\n * @email          :  hello@hellolovely.tv\n * @version        :  2.0.1\n * @createdFor     :  Adobe After Effects CC 2024 (Version 24.1.0 Build 78)\n * @description    :  Sends the selected layer's marker spans to the Render Queue and appends the marker comment to the filename. Useful for queueing multiple parts of a single comp, without having to rename each output.\n *========================================================================**/\n\n(function queueLayerMarkerSpans() {\n\n    app.beginUndoGroup(\"'Queue Layer Marker Spans'\");\n\n    function exit(msg) {\n        if (msg) alert(msg);\n        app.endUndoGroup();\n    }\n    \n    var comp = app.project.activeItem;\n    \n    var comp = app.project.activeItem;\n    if (!comp || !(comp instanceof CompItem)) {\n        return exit(\"Please select a composition.\");\n    }\n\n    var spanLayer = comp.selectedLayers[0];\n    if (!spanLayer) {\n        return exit(\"Please select a layer.\");\n    }\n\n    var layerMarkers = spanLayer.property(\"Marker\");\n\n    if (layerMarkers.numKeys === 0) {\n        return exit(\"The selected layer has no markers.\");\n    }\n\n    var projPath = app.project.file.path;\n    var skipped  = [];\n\n    for (var i = 1; i <= layerMarkers.numKeys; i++) {\n        var marker     = layerMarkers.keyValue(i);\n        var markerTime = layerMarkers.keyTime(i);\n        var markerName = layerMarkers.keyValue(i).comment;\n\n        if (marker.duration <= 0) {\n            skipped.push(markerName);\n            continue;\n        }\n\n        var item = app.project.renderQueue.items.add(comp);\n        item.timeSpanStart    = markerTime;\n        item.timeSpanDuration = marker.duration;\n\n        var output = item.outputModules[1];\n        output.file = new File(projPath + \"/_Renders/\" + comp.name + \"_\" + markerName);\n    }\n\n    if (skipped.length) {\n        alert(\"Skipped non-span markers: \" + skipped.join(\", \"));\n    }\n\n    app.endUndoGroup();\n    \n})();"
+          },
+          "modifiers": {
+            "shift": null,
+            "alt": null,
+            "meta": null
+          }
+        }
+      },
+      {
+        "id": "btn_mmpd5tw0ztaonz",
+        "kind": "action",
+        "label": "",
+        "displayMode": "icon",
+        "iconSource": "fontawesome",
+        "iconName": "list-check",
+        "customIconData": "",
+        "color": "#FF32Fa",
+        "isWide": false,
+        "tooltip": "Clear Render Queue",
+        "action": {
+          "type": "runScriptlet",
+          "config": {
+            "code": "/**========================================================================\n * ?                  CleanRenderQueue.jsx\n * @author         :  Jason Schwarz (https://hellolovely.tv)\n * @email          :  hello@hellolovely.tv\n * @version        :  1.0.0\n * @createdFor     :  Adobe After Effects CC\n * @description    :  Deletes all items in the Render Queue.\n *========================================================================**/\n\n(function cleanRenderQueue(){\n    var rq = app.project.renderQueue;\n\n    for(var item = rq.numItems; item != 0; item--){\n        rq.item(item).remove();\n    }\n\n})();"
+          },
+          "modifiers": {
+            "shift": null,
+            "alt": null,
+            "meta": null
+          }
+        }
+      },
+      {
+        "id": "btn_mmpd7rchkg0ip8",
+        "kind": "action",
+        "label": "",
+        "displayMode": "icon",
+        "iconSource": "fontawesome",
+        "iconName": "folder-tree",
+        "customIconData": "",
+        "color": "#afafaf",
+        "isWide": false,
+        "tooltip": "Create Project Structure",
+        "action": {
+          "type": "runScriptlet",
+          "config": {
+            "code": "/**========================================================================\n * ?                  CreateProjectFolders.jsx\n * @author         :  Jason Schwarz (https://hellolovely.tv)\n * @email          :  hello@hellolovely.tv\n * @version        :  1.0.0\n * @createdFor     :  Adobe After Effects CC 2024 (Version 24.1.0 Build 78)\n * @description    :  Create project folder structure.\n *========================================================================**/\n\n(function createProjectFolders() {\n\n    app.beginUndoGroup(\"Setup Project\");\n\n    // Project Setup: Create Default Folders\n    var_Collects = 0;\n    var_Output = 0;\n    var_MainComps = 0;\n    var_PreComps = 0;\n    var_Assets = 0;\n    var_Ref = 0;\n    var_Solids = 0;\n\n    var_Sub_AEC = 0;\n    var_Sub_Raster = 0;\n    var_Sub_Vector = 0;\n    var_Sub_Stills = 0;\n    var_Sub_Footage = 0;\n    var_Sub_3dRenders = 0;\n    var_Sub_PreRenders = 0;\n    var_Sub_Audio = 0;\n    var_Sub_Misc = 0;\n\n    for (i = 1; i <= app.project.items.length; i++) {\n        current_name = app.project.item(i).name;\n\n        if (current_name == \"***Collects-MoveToTree\") {\n            var_Collects = 1;\n        }\n        if (current_name == \"1.Output\") {\n            var_Output = 1;\n        }\n        if (current_name == \"2.MainComps\") {\n            var_MainComps = 1;\n        }\n        if (current_name == \"3.PreComps\") {\n            var_PreComps = 1;\n        }\n        if (current_name == \"4.Assets\") {\n            var_Assets = 1;\n        }\n        if (current_name == \"5.Reference\") {\n            var_Ref = 1;\n        }\n        if (current_name == \"Solids\") {\n            var_Solids = 1;\n        }\n\n        if (current_name == \"_misc\") {\n            var_Sub_Misc = 1;\n        }\n    }\n\n    // Generate Folders\n    if (var_Collects == 0) {\n        my_collects_folder = app.project.items.addFolder(\"***Collects-MoveToTree\");\n        my_collects_folder.label = (0);\n    }\n    if (var_Output == 0) {\n        my_output_folder = app.project.items.addFolder(\"1.Output\");\n        my_output_folder.label = (8);\n    }\n    if (var_MainComps == 0) {\n        my_maincomp_folder = app.project.items.addFolder(\"2.MainComps\");\n        my_maincomp_folder.label = (13);\n    }\n    if (var_PreComps == 0) {\n        my_precomp_folder = app.project.items.addFolder(\"3.PreComps\");\n        my_precomp_folder.label = (14);\n    }\n    if (var_Assets == 0) {\n        my_assets_folder = app.project.items.addFolder(\"4.Assets\");\n        for (i = 1; i <= my_assets_folder.items.length; i++) {\n            if (current_name == \"0_AECs\") {\n                var_Sub_AEC = 1;\n            }\n            if (current_name == \"1_Raster\") {\n                var_Sub_Raster = 1;\n            }\n            if (current_name == \"2_Vector\") {\n                var_Sub_Vector = 1;\n            }\n            if (current_name == \"3_Stills\") {\n                var_Sub_Stills = 1;\n            }\n            if (current_name == \"4_Footage\") {\n                var_Sub_Footage = 1;\n            }\n            if (current_name == \"5_3D_Renders\") {\n                var_Sub_3dRenders = 1;\n            }\n            if (current_name == \"6_PreRenders\") {\n                var_Sub_PreRenders = 1;\n            }\n            if (current_name == \"7_Audio\") {\n                var_Sub_Audio = 1;\n            }\n        }\n        if (var_Sub_AEC == 0) {\n            my_aec = my_assets_folder.items.addFolder(\"0_AECs\");\n            my_aec.label = (11);\n        }\n        if (var_Sub_Raster == 0) {\n            my_rast = my_assets_folder.items.addFolder(\"1_Raster\");\n            my_rast.label = (11);\n        }\n        if (var_Sub_Vector == 0) {\n            my_vec = my_assets_folder.items.addFolder(\"2_Vector\");\n            my_vec.label = (11);\n        }\n        if (var_Sub_Stills == 0) {\n            my_stills = my_assets_folder.items.addFolder(\"3_Stills\");\n            my_stills.label = (11);\n        }\n        if (var_Sub_Footage == 0) {\n            my_footage = my_assets_folder.items.addFolder(\"4_Footage\");\n            my_footage.label = (11);\n        }\n        if (var_Sub_3dRenders == 0) {\n            my_3d = my_assets_folder.items.addFolder(\"5_3D_Renders\");\n            my_3d.label = (11);\n        }\n        if (var_Sub_PreRenders == 0) {\n            my_pre = my_assets_folder.items.addFolder(\"6_PreRenders\");\n            my_pre.label = (11);\n        }\n        if (var_Sub_Audio == 0) {\n            my_aud = my_assets_folder.items.addFolder(\"7_Audio\");\n            my_aud.label = (11);\n        }\n\n        my_assets_folder.label = (11);\n        my_assets_folder.items;\n\n    }\n    if (var_Ref == 0) {\n        my_ref_folder = app.project.items.addFolder(\"5.Reference\");\n        my_ref_folder.label = (10);\n    }\n    if (var_Solids == 0) {\n        my_solids_folder = app.project.items.addFolder(\"Solids\");\n        my_solids_folder.label = (1);\n        my_sub_solids_folder = my_solids_folder.items.addFolder(\"_misc\");\n        my_sub_solids_folder.label = (1);\n    }\n\n    app.endUndoGroup();\n\n})();"
+          },
+          "modifiers": {
+            "shift": null,
+            "alt": null,
+            "meta": null
+          }
+        }
+      },
+      {
+        "id": "btn_mn6u8rfeoc0zty",
+        "kind": "action",
+        "label": "",
+        "displayMode": "icon",
+        "iconSource": "fontawesome",
+        "iconName": "marker",
+        "customIconData": "",
+        "color": "#ffb932",
+        "isWide": false,
+        "tooltip": "MarkerPrep",
+        "action": {
+          "type": "runScriptlet",
+          "config": {
+            "code": "/**========================================================================\n * ?                  Util_MarkerPrep.jsx\n * @author         :  Jason Schwarz (https://hellolovely.tv)\n * @email          :  hello@hellolovely.tv\n * @version        :  1.0.13\n * @createdFor     :  After Effects CC 2022+ (v22+)\n * @description    :  Adds/Edits a Layer/Comp marker at the Current Time Indicator (Playhead). Suitable for kBar, MoBar, AEbar.\n *\n *                    Behaviour summary:\n *                      - First selected layer          → Add/Edit Layer marker at CTI.\n *                      - No selected layer             → Add/Edit Comp marker at CTI.\n *                      - Marker does not exist         → Opens blank dialog to create one.\n *                      - Marker already exists at CTI  → Opens dialog with it's values pre-filled for editing.\n *                    Dialog inputs:\n *                      - Comment   : Free-text field.\n *                      - Duration  : HH:MM:SS:FF timecode (blank / 00:00:00:00 = 0 s).\n *                      - 1-frame   : If ticked, a marker with a duration of 0 frames is promoted to 1 frame.\n *                      - Label     : Dropdown list of AE's user preference 16 label Colors.\n *========================================================================**/\n\n(function () {\n\n    // ─────────────────────────────────────────────────────────────\n    // LABEL DATA — sourced from AE preferences + getLabels()\n    // ─────────────────────────────────────────────────────────────\n\n    var CP1252_TABLE = {\n        161: 161, 162: 162, 163: 163, 164: 164, 165: 165, 166: 166,\n        167: 167, 168: 168, 169: 169, 170: 170, 171: 171, 172: 172,\n        174: 174, 175: 175, 176: 176, 177: 177, 178: 178, 179: 179,\n        180: 180, 181: 181, 182: 182, 183: 183, 184: 184, 185: 185,\n        186: 186, 187: 187, 188: 188, 189: 189, 190: 190, 191: 191,\n        192: 192, 193: 193, 194: 194, 195: 195, 196: 196, 197: 197,\n        198: 198, 199: 199, 200: 200, 201: 201, 202: 202, 203: 203,\n        204: 204, 205: 205, 206: 206, 207: 207, 208: 208, 209: 209,\n        210: 210, 211: 211, 212: 212, 213: 213, 214: 214, 215: 215,\n        216: 216, 217: 217, 218: 218, 219: 219, 220: 220, 221: 221,\n        222: 222, 223: 223, 224: 224, 225: 225, 226: 226, 227: 227,\n        228: 228, 229: 229, 230: 230, 231: 231, 232: 232, 233: 233,\n        234: 234, 235: 235, 236: 236, 237: 237, 238: 238, 239: 239,\n        240: 240, 241: 241, 242: 242, 243: 243, 244: 244, 245: 245,\n        246: 246, 247: 247, 248: 248, 249: 249, 250: 250, 251: 251,\n        252: 252, 253: 253, 254: 254, 255: 255, 338: 140, 339: 156,\n        352: 138, 353: 154, 376: 159, 381: 142, 382: 158, 402: 131,\n        710: 136, 732: 152, 8211: 150, 8212: 151, 8216: 145, 8217: 146,\n        8218: 130, 8220: 147, 8221: 148, 8222: 132, 8224: 134, 8225: 135,\n        8226: 149, 8230: 133, 8240: 137, 8249: 139, 8250: 155, 8364: 128,\n        8482: 153, 65533: 173,\n    };\n\n    function decodePrefBytes(raw, startIndex) {\n        if (startIndex === undefined) { startIndex = 0; }\n        var result = \"\";\n        for (var j = startIndex; j < raw.length; j++) {\n            var code = raw.charCodeAt(j);\n            // Remap non-linear CP1252 code points back to byte values.\n            if (CP1252_TABLE[code] !== undefined) {\n                code = CP1252_TABLE[code];\n            }\n            var hex = code.toString(16).toUpperCase();\n            if (hex.length === 1) { hex = \"0\" + hex; }\n            result += hex;\n        }\n        return result;\n    }\n\n    function hexToAsciiString(hex) {\n        var result = \"\";\n        for (var i = 0; i < hex.length; i += 2) {\n            result += String.fromCharCode(parseInt(hex.substr(i, 2), 16));\n        }\n        return result;\n    }\n\n    function buildLabelData() {\n\n        // ── Hardcoded defaults — used per-slot when a pref read fails ──\n        var DEFAULTS = [\n            { value: \"\",       name: \"None\"      }, // 0\n            { value: \"B53838\", name: \"Red\"        }, // 1\n            { value: \"E4D84C\", name: \"Yellow\"     }, // 2\n            { value: \"A9CBC7\", name: \"Aqua\"       }, // 3\n            { value: \"E5BCC9\", name: \"Pink\"       }, // 4\n            { value: \"A9A9CA\", name: \"Lavender\"   }, // 5\n            { value: \"E7C19E\", name: \"Peach\"      }, // 6\n            { value: \"B3C7B3\", name: \"Sea Foam\"   }, // 7\n            { value: \"677DE0\", name: \"Blue\"       }, // 8\n            { value: \"4AA44C\", name: \"Green\"      }, // 9\n            { value: \"8E2C9A\", name: \"Purple\"     }, // 10\n            { value: \"E8920D\", name: \"Orange\"     }, // 11\n            { value: \"7F452A\", name: \"Brown\"      }, // 12\n            { value: \"F46DD6\", name: \"Fuchsia\"    }, // 13\n            { value: \"3DA2A5\", name: \"Cyan\"       }, // 14\n            { value: \"A89677\", name: \"Sandstone\"  }, // 15\n            { value: \"1E401E\", name: \"Dark Green\" }  // 16\n        ];\n\n        var prevEncoding = $.appEncoding;\n        try {\n            $.appEncoding = 'CP1252';\n\n            var colorSection = \"Label Preference Color Section 5\";\n            var textSection  = \"Label Preference Text Section 7\";\n            var prefType     = PREFType.PREF_Type_MACHINE_INDEPENDENT;\n\n            var data = [{ value: \"\", name: \"None\" }]; // index 0\n\n            for (var i = 1; i <= 16; i++) {\n                var colorKey = \"Label Color ID 2 # \" + i.toString();\n                var textKey  = \"Label Text ID 2 # \"  + i.toString();\n\n                // ── Color value ──────────────────────────────────────\n                var colorHex = DEFAULTS[i].value;\n                try {\n                    var rawColor = app.preferences.getPrefAsString(\n                        colorSection, colorKey, prefType\n                    );\n                    if (rawColor && rawColor.length > 1) {\n                        colorHex = decodePrefBytes(rawColor, 1); // skip AE prefix byte\n                    }\n                } catch (colorErr) { /* keep default */ }\n\n                // ── Label name ────────────────────────────────────────\n                var labelName = DEFAULTS[i].name;\n                try {\n                    var rawName = app.preferences.getPrefAsString(\n                        textSection, textKey, prefType\n                    );\n                    if (rawName && rawName.length > 1) {\n                        var nameHex = decodePrefBytes(rawName, 0); // no prefix byte for text prefs\n                        var decoded = hexToAsciiString(nameHex);\n                        if (decoded && decoded.length > 0) {\n                            labelName = decoded;\n                        }\n                    }\n                } catch (nameErr) { /* keep default */ }\n\n                data.push({ value: colorHex, name: labelName });\n            }\n\n            return data;\n\n        } catch (e) {\n            return DEFAULTS;\n        } finally {\n            $.appEncoding = prevEncoding; // always restore\n        }\n    }\n\n    var LABEL_DATA = buildLabelData();\n\n    var LABEL_NAMES = (function () {\n        var names = [];\n        for (var i = 0; i < LABEL_DATA.length; i++) {\n            names.push(LABEL_DATA[i].name);\n        }\n        return names;\n    }());\n\n    // ─────────────────────────────────────────────────────────────\n    // UTILITY HELPERS\n    // ─────────────────────────────────────────────────────────────\n\n    /**\n     * Zero-pad a number to a given width.\n     * @param {number} n\n     * @param {number} width\n     * @returns {string}\n     */\n    function zeroPad(n, width) {\n        var s = String(Math.floor(Math.abs(n)));\n        while (s.length < width) { s = \"0\" + s; }\n        return s;\n    }\n\n    /**\n     * Check if a frame rate is a common SMPTE drop-frame rate.\n     * @param {number} fps\n     * @returns {boolean}\n     */\n    function isDropFrameRate(fps) {\n        var rounded = Math.round(fps * 100);\n        return (rounded === 2997 || rounded === 5994);\n    }\n\n    /**\n     * Convert a time in seconds to a HH:MM:SS:FF (or HH:MM:SS;FF) string.\n     * Uses SMPTE drop-frame notation when dropFrame is true and fps is a DF rate.\n     * @param {number}  seconds\n     * @param {number}  fps       - frames per second (always passed from active comp)\n     * @param {boolean} dropFrame - true to output drop-frame timecode\n     * @returns {string}\n     */\n    function secondsToTimecode(seconds, fps, dropFrame) {\n        if (isNaN(seconds) || seconds < 0) { seconds = 0; }\n        if (!fps || fps <= 0) {\n            var activeComp = app.project && app.project.activeItem;\n            if (!(activeComp instanceof CompItem)) {\n                alert(\"MarkerPrep: No active composition found to determine frame rate.\", \"MarkerPrep – Error\");\n                return \"00:00:00:00\";\n            }\n            fps = activeComp.frameRate;\n        }\n        if (dropFrame === undefined) { dropFrame = false; }\n\n        var roundFps    = Math.round(fps);\n        var totalFrames = Math.round(seconds * fps);\n        var hh, mm, ss, ff, sep;\n\n        if (dropFrame && isDropFrameRate(fps)) {\n            // SMPTE drop-frame: 2 frames dropped/min for 29.97, 4 for 59.94\n            var D              = Math.round(fps * 0.066666);\n            var framesPer10Min = roundFps * 600 - D * 9;\n            var framesPerMin   = roundFps * 60  - D;\n\n            var tens      = Math.floor(totalFrames / framesPer10Min);\n            var remainder = totalFrames % framesPer10Min;\n\n            var extraMinutes;\n            if (remainder < roundFps * 60) {\n                extraMinutes = 0;\n            } else {\n                extraMinutes = Math.floor((remainder - roundFps * 60) / framesPerMin) + 1;\n            }\n\n            var totalMinutes = tens * 10 + extraMinutes;\n            hh = Math.floor(totalMinutes / 60);\n            mm = totalMinutes % 60;\n\n            var remFrames;\n            if (extraMinutes === 0) {\n                remFrames = remainder;\n            } else {\n                remFrames = (remainder - roundFps * 60) % framesPerMin + D;\n            }\n\n            ss  = Math.floor(remFrames / roundFps);\n            ff  = remFrames % roundFps;\n            sep = \";\";\n        } else {\n            // Non-drop-frame\n            ff = totalFrames % roundFps;\n            var totalSecs = Math.floor(totalFrames / roundFps);\n            ss = totalSecs % 60;\n            var totalMins = Math.floor(totalSecs / 60);\n            mm = totalMins % 60;\n            hh = Math.floor(totalMins / 60);\n            sep = \":\";\n        }\n\n        return zeroPad(hh, 2) + \":\" +\n               zeroPad(mm, 2) + \":\" +\n               zeroPad(ss, 2) + sep +\n               zeroPad(ff, 2);\n    }\n\n    /**\n     * Parse a HH:MM:SS:FF timecode string to seconds.\n     * Accepts : (NDF), ; (drop-frame), and . (shorthand for :) as separators.\n     * A semicolon before the frames field triggers SMPTE drop-frame compensation.\n     * Returns -1 if the string is not valid.\n     * @param {string} tc\n     * @param {number} fps\n     * @returns {number}\n     */\n    function timecodeToSeconds(tc, fps) {\n        if (!fps || fps <= 0) {\n            var activeComp = app.project && app.project.activeItem;\n            if (!(activeComp instanceof CompItem)) {\n                alert(\"MarkerPrep: No active composition found to determine frame rate.\", \"MarkerPrep – Error\");\n                return -1;\n            }\n            fps = activeComp.frameRate;\n        }\n\n        var str = String(tc);\n        // Detect drop-frame indicator (semicolon separator)\n        var isDrop = str.indexOf(\";\") !== -1;\n        // Normalize all separators (; . :) to colons for parsing\n        var clean = str.replace(/[;.]/g, \":\");\n        var parts = clean.split(\":\");\n        if (parts.length !== 4) { return -1; }\n\n        var hh = parseInt(parts[0], 10);\n        var mm = parseInt(parts[1], 10);\n        var ss = parseInt(parts[2], 10);\n        var ff = parseInt(parts[3], 10);\n        if (isNaN(hh) || isNaN(mm) || isNaN(ss) || isNaN(ff)) { return -1; }\n\n        var roundFps = Math.round(fps);\n        if (mm > 59 || ss > 59 || ff >= roundFps) { return -1; }\n\n        if (isDrop && isDropFrameRate(fps)) {\n            // SMPTE drop-frame compensation\n            var D = Math.round(fps * 0.066666);\n            var totalMinutes = hh * 60 + mm;\n            // Dropped frame numbers are invalid (e.g., 00;00 and 00;01 at non-10th minutes)\n            if (ss === 0 && ff < D && (totalMinutes % 10) !== 0) { return -1; }\n            var totalFrames = roundFps * (hh * 3600 + mm * 60 + ss) + ff\n                            - D * totalMinutes\n                            + D * Math.floor(totalMinutes / 10);\n            return totalFrames / fps;\n        }\n\n        // Non-drop-frame: convert via total frame count for accuracy with non-integer fps\n        var totalFrames = roundFps * (hh * 3600 + mm * 60 + ss) + ff;\n        return totalFrames / fps;\n    }\n\n    /**\n     * Round a time value to the nearest frame boundary.\n     * @param {number} t   - time in seconds\n     * @param {number} fps\n     * @returns {number}\n     */\n    function snapToFrame(t, fps) {\n        return Math.round(t * fps) / fps;\n    }\n\n    /**\n     * Return the duration of one frame in seconds.\n     * @param {number} fps\n     * @returns {number}\n     */\n    function oneFrame(fps) {\n        return 1 / fps;\n    }\n\n    // ─────────────────────────────────────────────────────────────\n    // UI DRAWING HELPERS\n    // ─────────────────────────────────────────────────────────────\n\n    /**\n     * Fill a rounded rectangle using overlapping rects + corner ellipses.\n     * Works within ScriptUI's limited path API (no bezier curves).\n     * @param {ScriptUIGraphics} g\n     * @param {ScriptUIBrush}    brush\n     * @param {number} x\n     * @param {number} y\n     * @param {number} w\n     * @param {number} h\n     * @param {number} r  - corner radius\n     */\n    function fillRoundedRect(g, brush, x, y, w, h, r) {\n        if (r > h / 2) { r = Math.floor(h / 2); }\n        if (r > w / 2) { r = Math.floor(w / 2); }\n        // Vertical centre strip\n        g.rectPath(x, y + r, w, h - 2 * r);\n        g.fillPath(brush);\n        // Horizontal top strip\n        g.rectPath(x + r, y, w - 2 * r, r);\n        g.fillPath(brush);\n        // Horizontal bottom strip\n        g.rectPath(x + r, y + h - r, w - 2 * r, r);\n        g.fillPath(brush);\n        // Four corner quarter-circles\n        g.ellipsePath(x, y, 2 * r, 2 * r);\n        g.fillPath(brush);\n        g.ellipsePath(x + w - 2 * r, y, 2 * r, 2 * r);\n        g.fillPath(brush);\n        g.ellipsePath(x, y + h - 2 * r, 2 * r, 2 * r);\n        g.fillPath(brush);\n        g.ellipsePath(x + w - 2 * r, y + h - 2 * r, 2 * r, 2 * r);\n        g.fillPath(brush);\n    }\n\n    /**\n     * Create a flat, rounded-corner button with hover / press visual states.\n     * @param {Group}  parent\n     * @param {string} text\n     * @param {object} opts  - { name, width, height, primary }\n     * @returns {Button}\n     */\n    function createStyledButton(parent, text, opts) {\n        if (!opts) { opts = {}; }\n        var btn = parent.add(\"button\", undefined, \"\", { name: opts.name || \"\" });\n        btn.preferredSize = [opts.width || 90, opts.height || 26];\n        btn._label   = text;\n        btn._hover   = false;\n        btn._press   = false;\n        btn._primary = opts.primary || false;\n\n        btn.addEventListener(\"mouseover\", function () { btn._hover = true;  btn.notify(\"onDraw\"); });\n        btn.addEventListener(\"mouseout\",  function () { btn._hover = false; btn._press = false; btn.notify(\"onDraw\"); });\n        btn.addEventListener(\"mousedown\", function () { btn._press = true;  btn.notify(\"onDraw\"); });\n        btn.addEventListener(\"mouseup\",   function () { btn._press = false; btn.notify(\"onDraw\"); });\n\n        btn.onDraw = function () {\n            var g = this.graphics;\n            var w = this.size[0];\n            var h = this.size[1];\n            var r = 4;\n            var bg;\n\n            if (this._primary) {\n                bg = this._press  ? [0.16, 0.40, 0.75, 1]\n                   : this._hover ? [0.25, 0.55, 0.92, 1]\n                   :               [0.22, 0.50, 0.86, 1];\n            } else {\n                bg = this._press  ? [0.22, 0.22, 0.22, 1]\n                   : this._hover ? [0.38, 0.38, 0.38, 1]\n                   :               [0.30, 0.30, 0.30, 1];\n            }\n\n            fillRoundedRect(g, g.newBrush(g.BrushType.SOLID_COLOR, bg), 0, 0, w, h, r);\n\n            var txtPen = g.newPen(g.PenType.SOLID_COLOR, [1, 1, 1, 1], 1);\n            var sz = g.measureString(this._label);\n            g.drawString(this._label, txtPen, (w - sz.width) / 2, (h - sz.height) / 2);\n        };\n\n        return btn;\n    }\n\n    // ─────────────────────────────────────────────────────────────\n    // MARKER LOOKUP\n    // ─────────────────────────────────────────────────────────────\n\n    function findMarkerAtTime(markerProp, time, fps) {\n        var count = markerProp.numKeys;\n        var snapped = snapToFrame(time, fps);\n        for (var i = 1; i <= count; i++) {\n            var keyTime = snapToFrame(markerProp.keyTime(i), fps);\n            if (Math.abs(keyTime - snapped) < (0.5 / fps)) {\n                return { index: i, marker: markerProp.keyValue(i) };\n            }\n        }\n        return null;\n    }\n\n    // ─────────────────────────────────────────────────────────────\n    // DIALOG BUILDER\n    // ─────────────────────────────────────────────────────────────\n\n    function showDialog(opts) {\n\n        var isEdit       = opts.isEdit       || false;\n        var isLayer      = opts.isLayer      || false;\n        var fps          = opts.fps          || 24;\n        var existingData = opts.existingData || null;\n        var dropFrame    = opts.dropFrame    || false;\n\n        // ── window ──────────────────────────────────────────────\n        var title = (isEdit ? \"Edit \" : \"Add \") +\n                    (isLayer ? \"Layer\" : \"Comp\") + \" Marker\";\n        var win = new Window(\"dialog\", title);\n        win.orientation = \"column\";\n        win.alignChildren = [\"fill\", \"top\"];\n        win.spacing = 10;\n        win.margins = 16;\n\n        // ── info label ──────────────────────────────────────────\n        var infoText = isEdit\n            ? \"Editing Existing \" + (isLayer ? \"Layer\" : \"Comp\") + \" Marker at Current Time.\"\n            : \"Adding New \"       + (isLayer ? \"Layer\" : \"Comp\") + \" Marker at Current Time.\";\n        var infoGrp = win.add(\"group\");\n        infoGrp.add(\"statictext\", undefined, infoText);\n\n        // ── separator ───────────────────────────────────────────\n        win.add(\"panel\", undefined, \"\");\n\n        // ── Comment ─────────────────────────────────────────────\n        var commentPanel = win.add(\"panel\", undefined, \"Comment\");\n        commentPanel.alignChildren = [\"fill\", \"top\"];\n        commentPanel.margins = [10, 15, 10, 10];\n        var commentField = commentPanel.add(\n            \"edittext\", undefined,\n            (existingData && existingData.comment) ? existingData.comment : \"\",\n            { multiline: false }\n        );\n        commentField.preferredSize.width = 300;\n\n        // ── Duration ────────────────────────────────────────────\n        var durPanel = win.add(\"panel\", undefined, \"Duration  (HH:MM:SS:FF)\");\n        durPanel.alignChildren = [\"fill\", \"top\"];\n        durPanel.margins = [10, 15, 10, 10];\n\n        var durGrp = durPanel.add(\"group\");\n        durGrp.orientation = \"row\";\n        durGrp.alignChildren = [\"left\", \"center\"];\n\n        var defaultDurTC = \"00:00:00:00\";\n        if (existingData && existingData.durationSecs > 0) {\n            defaultDurTC = secondsToTimecode(existingData.durationSecs, fps, dropFrame);\n        }\n        var durationField = durGrp.add(\"edittext\", undefined, defaultDurTC);\n        durationField.preferredSize.width = 120;\n        durGrp.add(\"statictext\", undefined, \" .  or  ;  as separatorr \");\n\n        // ── 1-frame minimum tickbox ──────────────────────────────\n        var oneFrameCheck = win.add(\"checkbox\", undefined, \"Single Markers to 1-frame Span\");\n        oneFrameCheck.value = true; // ON by default\n\n        // ── Label color ─────────────────────────────────────────\n        var labelPanel = win.add(\"panel\", undefined, \"Label Color\");\n        labelPanel.alignChildren = [\"fill\", \"top\"];\n        labelPanel.margins = [10, 15, 10, 10];\n        var labelGrp = labelPanel.add(\"group\");\n        labelGrp.orientation = \"row\";\n        labelGrp.alignChildren = [\"left\", \"center\"];\n        labelGrp.spacing = 8;\n\n        // Live color swatch — shows the selected label's colour\n        var swatch = labelGrp.add(\"button\", undefined, \"\");\n        swatch.preferredSize = [24, 24];\n        swatch.onDraw = function () {\n            var g   = this.graphics;\n            var w   = this.size[0];\n            var h   = this.size[1];\n            var idx = labelDD.selection ? labelDD.selection.index : 0;\n            var hex = LABEL_DATA[idx].value;\n            // Thin border\n            var borderBrush = g.newBrush(g.BrushType.SOLID_COLOR, [0.50, 0.50, 0.50, 1]);\n            fillRoundedRect(g, borderBrush, 0, 0, w, h, 3);\n            if (hex && hex.length >= 6) {\n                var cr = parseInt(hex.substr(0, 2), 16) / 255;\n                var cg = parseInt(hex.substr(2, 2), 16) / 255;\n                var cb = parseInt(hex.substr(4, 2), 16) / 255;\n                fillRoundedRect(g, g.newBrush(g.BrushType.SOLID_COLOR, [cr, cg, cb, 1]), 1, 1, w - 2, h - 2, 2);\n            } else {\n                // \"None\" — neutral fill\n                fillRoundedRect(g, g.newBrush(g.BrushType.SOLID_COLOR, [0.25, 0.25, 0.25, 1]), 1, 1, w - 2, h - 2, 2);\n            }\n        };\n\n        var labelDD = labelGrp.add(\"dropdownlist\", undefined, LABEL_NAMES);\n        labelDD.preferredSize.width = 155;\n\n        labelDD.onChange = function () {\n            swatch.notify(\"onDraw\");\n        };\n\n        // Pre-select existing label (default 0 = None)\n        var defaultLabelIdx = 0;\n        if (existingData && typeof existingData.label === \"number\") {\n            defaultLabelIdx = existingData.label;\n        }\n        labelDD.selection = defaultLabelIdx;\n\n        // ── Buttons ──────────────────────────────────────────────\n        win.add(\"panel\", undefined, \"\"); // separator\n\n        var btnGrp = win.add(\"group\");\n        btnGrp.orientation = \"row\";\n        btnGrp.alignment   = \"right\";\n        btnGrp.spacing     = 8;\n\n        var cancelBtn = createStyledButton(btnGrp, \"Cancel\", { name: \"cancel\", width: 90 });\n        var applyBtn  = createStyledButton(btnGrp, \"Apply\",  { name: \"ok\", width: 90, primary: true });\n\n        // ── Result holder ────────────────────────────────────────\n        var result = null;\n\n        // ── Apply handler ────────────────────────────────────────\n        applyBtn.onClick = function () {\n\n            // Validate duration field\n            var tcStr = durationField.text;\n            var durationSecs = 0;\n\n            if (tcStr === \"\" || tcStr === \"00:00:00:00\") {\n                durationSecs = 0;\n            } else {\n                durationSecs = timecodeToSeconds(tcStr, fps);\n                if (durationSecs < 0) {\n                    alert(\n                        \"Invalid Duration Timecode.\\n\" +\n                        \"Format: HH:MM:SS:FF  ( .  or  ;  as separators)\\n\" +\n                        \"Example: 00:00:02:12  or  00.00.02.12\",\n                        \"MarkerPrep – Input Error\"\n                    );\n                    durationField.active = true;\n                    return; // keep dialog open\n                }\n            }\n\n            // Apply 1-frame minimum if ticked and duration is 0\n            if (oneFrameCheck.value && durationSecs === 0) {\n                durationSecs = oneFrame(fps);\n            }\n\n            result = {\n                comment      : commentField.text,\n                durationSecs : durationSecs,\n                label        : labelDD.selection ? labelDD.selection.index : 0,\n                oneFrameMin  : oneFrameCheck.value\n            };\n\n            win.close();\n        };\n\n        cancelBtn.onClick = function () {\n            result = null;\n            win.close();\n        };\n\n        win.show();\n        return result;\n    }\n\n    // ─────────────────────────────────────────────────────────────\n    // APPLY MARKER DATA\n    // ─────────────────────────────────────────────────────────────\n\n    /**\n     * Create a new MarkerValue populated from dialogResult.\n     * @param {object} dialogResult\n     * @returns {MarkerValue}\n     */\n    function buildMarkerValue(dialogResult) {\n        var mv = new MarkerValue(dialogResult.comment || \"\");\n        mv.duration = dialogResult.durationSecs;\n        mv.label    = dialogResult.label;\n        return mv;\n    }\n\n    /**\n     * Write marker to a MarkerValueProperty.\n     * Edits in place if existingIndex is provided, otherwise adds a new key.\n     *\n     * @param {Property} markerProp\n     * @param {number}   time           - seconds (CTI)\n     * @param {object}   dialogResult\n     * @param {number|null} existingIndex - 1-based key index if editing\n     */\n    function applyMarker(markerProp, time, dialogResult, existingIndex) {\n        var mv = buildMarkerValue(dialogResult);\n\n        if (existingIndex !== null && existingIndex !== undefined) {\n            // Remove old key and re-add (AE ExtendScript has no\n            // direct \"set value at existing key\" for markers).\n            markerProp.removeKey(existingIndex);\n        }\n        markerProp.setValueAtTime(time, mv);\n    }\n\n    // ─────────────────────────────────────────────────────────────\n    // EXTRACT EXISTING MARKER DATA\n    // ─────────────────────────────────────────────────────────────\n\n    /**\n     * Pull editable fields out of an existing MarkerValue.\n     * @param {MarkerValue} mv\n     * @returns {{ comment: string, durationSecs: number, label: number }}\n     */\n    function extractMarkerData(mv) {\n        return {\n            comment      : mv.comment  !== undefined ? mv.comment  : \"\",\n            durationSecs : mv.duration !== undefined ? mv.duration : 0,\n            label        : mv.label    !== undefined ? mv.label    : 0\n        };\n    }\n\n    // ─────────────────────────────────────────────────────────────\n    // MAIN ENTRY POINT\n    // ─────────────────────────────────────────────────────────────\n\n    function main() {\n\n        // ── Guard: active project ────────────────────────────────\n        if (!app.project) {\n            alert(\"No Project is Currently Open.\", \"MarkerPrep\");\n            return;\n        }\n\n        // ── Guard: active composition ────────────────────────────\n        var comp = app.project.activeItem;\n        if (!(comp instanceof CompItem)) {\n            alert(\n                \"Please Open and Activate a Composition Before Running MarkerPrep.\",\n                \"MarkerPrep\"\n            );\n            return;\n        }\n\n        var fps     = comp.frameRate;\n        var cti     = comp.time; // current time in seconds\n\n        // ── Determine target: layer or comp ──────────────────────\n        var useLayer  = false;\n        var targetLayer = null;\n\n        if (comp.selectedLayers.length > 0) {\n            targetLayer = comp.selectedLayers[0]; // first selected layer only\n            useLayer    = true;\n        }\n\n        // ── Get the appropriate marker property ──────────────────\n        var markerProp;\n        try {\n            if (useLayer) {\n                markerProp = targetLayer.property(\"ADBE Marker\");\n                if (!markerProp) { throw new Error(\"Layer has No Marker Property.\"); }\n            } else {\n                markerProp = comp.markerProperty;\n                if (!markerProp) { throw new Error(\"Comp has No Marker Property.\"); }\n            }\n        } catch (e) {\n            alert(\n                \"Could not access marker property:\\n\" + e.message,\n                \"MarkerPrep – Error\"\n            );\n            return;\n        }\n\n        // ── Check for existing marker at CTI ─────────────────────\n        var existing = findMarkerAtTime(markerProp, cti, fps);\n        var isEdit   = (existing !== null);\n        var existingData = isEdit ? extractMarkerData(existing.marker) : null;\n\n        // ── Show dialog ──────────────────────────────────────────\n        var dialogResult = showDialog({\n            isEdit       : isEdit,\n            isLayer      : useLayer,\n            fps          : fps,\n            dropFrame    : comp.dropFrame || false,\n            existingData : existingData\n        });\n\n        if (dialogResult === null) {\n            // User cancelled — do nothing\n            return;\n        }\n\n        // ── Apply with undo group ────────────────────────────────\n        var undoLabel = (isEdit ? \"Edit \" : \"Add \") +\n                        (useLayer ? \"Layer\" : \"Comp\") + \" Marker\";\n\n        app.beginUndoGroup(undoLabel);\n        try {\n            applyMarker(\n                markerProp,\n                cti,\n                dialogResult,\n                isEdit ? existing.index : null\n            );\n        } catch (e) {\n            app.endUndoGroup();\n            alert(\n                \"Failed to \" + (isEdit ? \"Edit\" : \"Add\") + \" Marker:\\n\" + e.message,\n                \"MarkerPrep – Error\"\n            );\n            return;\n        }\n        app.endUndoGroup();\n\n    }\n\n    // ── Run ──────────────────────────────────────────────────────\n    main();\n\n}());\n"
+          },
+          "modifiers": {
+            "shift": null,
+            "alt": null,
+            "meta": null
+          }
+        }
+      }
+    ],
+    "createdAt": 1773428918220,
+    "updatedAt": 1774556916635
+  }
+}
